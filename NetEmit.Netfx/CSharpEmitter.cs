@@ -22,12 +22,12 @@ namespace NetEmit.Netfx
             var file = Path.GetFullPath(ass.GetFileName());
             var parms = new CompilerParameters
             {
-                CompilerOptions = $"/target:{ass.GetKind()}",
+                CompilerOptions = $"/target:{ass.GetKind()} /optimize",
                 GenerateExecutable = ass.IsExe,
-                IncludeDebugInformation = true,
+                IncludeDebugInformation = false,
                 OutputAssembly = file
             };
-            var sources = new List<string> {GenerateMeta(ass)};
+            var sources = new List<string> { GenerateMeta(ass) };
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
             var dyn = results.CompiledAssembly;
             if (dyn == null)
