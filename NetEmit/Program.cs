@@ -1,4 +1,5 @@
 ﻿using NetEmit.API;
+using NetEmit.CodeDOM;
 using NetEmit.Netfx;
 
 namespace NetEmit
@@ -9,13 +10,21 @@ namespace NetEmit
         {
             using (IAssemblyEmitter bld = new AssemblyEmitter())
             {
-                IAssembly ass = new NewAssembly {Name = "TestGen1"};
+                IAssembly ass = new NewAssembly
+                {
+                    Name = "TestGen",
+                    FileName = "TestGen1.dll"
+                };
                 bld.Emit(ass);
             }
 
             using (IAssemblyEmitter bld = new CSharpEmitter())
             {
-                IAssembly ass = new NewAssembly {Name = "TestGen2"};
+                IAssembly ass = new NewAssembly
+                {
+                    Name = "TestGen",
+                    FileName = "TestGen2.dll"
+                };
                 bld.Emit(ass);
             }
 

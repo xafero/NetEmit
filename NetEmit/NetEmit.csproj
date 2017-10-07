@@ -47,6 +47,10 @@
       <Project>{F896EDBD-DA8A-4472-8071-D722FBB66E48}</Project>
       <Name>NetEmit.API</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NetEmit.CodeDOM\NetEmit.CodeDOM.csproj">
+      <Project>{57B3974D-D137-4C32-BC2B-25DBE167614F}</Project>
+      <Name>NetEmit.CodeDOM</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NetEmit.Netfx\NetEmit.Netfx.csproj">
       <Project>{712C1E0F-79D2-4AED-962D-4AC82897FD68}</Project>
       <Name>NetEmit.Netfx</Name>
