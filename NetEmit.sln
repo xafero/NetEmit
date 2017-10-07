@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.API", "NetEmit.API\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.Netfx", "NetEmit.Netfx\NetEmit.Netfx.csproj", "{712C1E0F-79D2-4AED-962D-4AC82897FD68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.CodeDOM", "NetEmit.CodeDOM\NetEmit.CodeDOM.csproj", "{57B3974D-D137-4C32-BC2B-25DBE167614F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.CodeDom", "NetEmit.CodeDom\NetEmit.CodeDom.csproj", "{57B3974D-D137-4C32-BC2B-25DBE167614F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
