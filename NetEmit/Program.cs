@@ -12,8 +12,7 @@ namespace NetEmit
             {
                 IAssembly ass = new NewAssembly
                 {
-                    Name = "TestGen",
-                    FileName = "TestGen1.dll"
+                    Name = "TestGen1"
                 };
                 bld.Emit(ass);
             }
@@ -22,8 +21,7 @@ namespace NetEmit
             {
                 IAssembly ass = new NewAssembly
                 {
-                    Name = "TestGen",
-                    FileName = "TestGen2.dll"
+                    Name = "TestGen2"
                 };
                 bld.Emit(ass);
             }

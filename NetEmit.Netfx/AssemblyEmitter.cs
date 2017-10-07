@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using NetEmit.API;
 
 namespace NetEmit.Netfx
@@ -22,9 +23,18 @@ namespace NetEmit.Netfx
             var file = Path.GetFullPath(ass.GetFileName());
             var dir = Path.GetDirectoryName(file);
             var dyn = Domain.DefineDynamicAssembly(assName, assAccess, dir);
+            Emit(ass, dyn);
             dyn.Save(Path.GetFileName(file));
 
             Console.WriteLine(file);
+        }
+
+        private static void Emit(IAssembly ass, AssemblyBuilder bld)
+        {
+            bld.AddAttribute<RuntimeCompatibilityAttribute>(
+                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(true)
+            );
+            var mod = bld.DefineDynamicModule(ass.GetFileName());
         }
 
         public void Dispose()
