@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.CSharp;
 using NetEmit.API;
 
-namespace NetEmit.CodeDOM
+namespace NetEmit.CodeDom
 {    
     public class CSharpEmitter : IAssemblyEmitter
     {

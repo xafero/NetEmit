@@ -1,5 +1,5 @@
 ﻿using NetEmit.API;
-using NetEmit.CodeDOM;
+using NetEmit.CodeDom;
 using NetEmit.Netfx;
 
 namespace NetEmit
