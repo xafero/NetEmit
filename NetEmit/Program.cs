@@ -9,31 +9,17 @@ namespace NetEmit
         {
             using (IAssemblyEmitter bld = new AssemblyEmitter())
             {
-                IAssembly ass = new NewAssembly { Name = "TestGen" };
+                IAssembly ass = new NewAssembly {Name = "TestGen1"};
                 bld.Emit(ass);
+            }
 
+            using (IAssemblyEmitter bld = new CSharpEmitter())
+            {
+                IAssembly ass = new NewAssembly {Name = "TestGen2"};
+                bld.Emit(ass);
             }
 
             // Console.ReadLine();
         }
     }
 }
-/*
- * CSharpCodeProvider provider = new CSharpCodeProvider();
-
-CompilerParameters compilerParams = new CompilerParameters();
-
-compilerParams.CompilerOptions = "/target:library /optimize";
-
-compilerParams.GenerateExecutable = false;
-
-compilerParams.GenerateInMemory = true;
-
-compilerParams.IncludeDebugInformation = false;
-
- some ReferencedAssemblies
-
-CompilerResults results = provider.CompileAssemblyFromSource(compilerParams, dat);
-
-Dll = results.CompiledAssembly;
-    */

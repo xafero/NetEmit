@@ -33,6 +33,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApiExtensions.cs" />
     <Compile Include="IAssembly.cs" />
     <Compile Include="IAssemblyEmitter.cs" />
     <Compile Include="NewAssembly.cs" />

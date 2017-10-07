@@ -19,13 +19,13 @@ namespace NetEmit.Netfx
         {
             var assName = new AssemblyName(ass.Name);
             const AssemblyBuilderAccess assAccess = AssemblyBuilderAccess.Save;
-            var file = Path.GetFullPath(ass.FileName ?? $"{ass.Name}.{GetExt(ass)}");
+            var file = Path.GetFullPath(ass.GetFileName());
             var dir = Path.GetDirectoryName(file);
             var dyn = Domain.DefineDynamicAssembly(assName, assAccess, dir);
             dyn.Save(Path.GetFileName(file));
-        }
 
-        private static string GetExt(IAssembly ass) => ass.IsExe ? "exe" : "dll";
+            Console.WriteLine(file);
+        }
 
         public void Dispose()
         {
