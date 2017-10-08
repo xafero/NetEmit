@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NetEmit.API
 {
@@ -11,5 +12,7 @@ namespace NetEmit.API
         public string FileName { get; set; }
 
         public bool IsExe { get; set; }
+
+        public ICollection<INamespace> Namespaces { get; set; } = new SortedSet<INamespace>();
     }
 }

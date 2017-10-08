@@ -37,6 +37,8 @@
     <Compile Include="IAssembly.cs" />
     <Compile Include="IAssemblyEmitter.cs" />
     <Compile Include="NewAssembly.cs" />
+    <Compile Include="NewNamespace.cs" />
+    <Compile Include="NewType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
