@@ -15,7 +15,21 @@ namespace NetEmit.Cecil
             var constrArgs = args.Except(temp).ToArray();
             var props = temp.Select(i => type.GetProperty(i.Item1)).ToArray();
             var propArgs = temp.Select(i => i.Item2).ToArray();
-            bld.CustomAttributes.Add(new CustomAttribute(constr));
+            var attr = new CustomAttribute(constr);
+            foreach (var constrArg in constrArgs)
+            {
+                var aa = new CustomAttributeArgument(mod.ImportReference(constrArg.GetType()), constrArg);
+                attr.ConstructorArguments.Add(aa);
+            }
+            for (var i = 0; i < props.Length; i++)
+            {
+                var prop = props[i];
+                var propArg = propArgs[i];
+                var aa = new CustomAttributeArgument(mod.ImportReference(prop.PropertyType), propArg);
+                var pa = new CustomAttributeNamedArgument(prop.Name, aa);
+                attr.Properties.Add(pa);
+            }
+            bld.CustomAttributes.Add(attr);
         }
     }
 }
