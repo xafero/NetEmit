@@ -18,7 +18,10 @@ namespace NetEmit.Netfx
 
         public void Emit(IAssembly ass)
         {
-            var assName = new AssemblyName(ass.Name) {Version = Version.Parse(ass.Version)};
+            var assName = new AssemblyName(ass.Name)
+            {
+                Version = Version.Parse(ass.GetVersion())
+            };
             const AssemblyBuilderAccess assAccess = AssemblyBuilderAccess.Save;
             var file = Path.GetFullPath(ass.GetFileName());
             var dir = Path.GetDirectoryName(file);

@@ -10,7 +10,7 @@ namespace NetEmit.Cecil
     {
         public void Emit(IAssembly ass)
         {
-            var ver = Version.Parse(ass.Version);
+            var ver = Version.Parse(ass.GetVersion());
             var assName = new AssemblyNameDefinition(ass.Name, ver)
             {
                 HashAlgorithm = AssemblyHashAlgorithm.SHA1

@@ -7,7 +7,7 @@ using Microsoft.CSharp;
 using NetEmit.API;
 
 namespace NetEmit.CodeDom
-{    
+{
     public class CSharpEmitter : IAssemblyEmitter
     {
         public CSharpCodeProvider Provider { get; }
@@ -27,7 +27,7 @@ namespace NetEmit.CodeDom
                 IncludeDebugInformation = false,
                 OutputAssembly = file
             };
-            var sources = new List<string> { GenerateMeta(ass) };
+            var sources = new List<string> {GenerateMeta(ass)};
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
             var dyn = results.CompiledAssembly;
             if (dyn == null)
@@ -43,7 +43,7 @@ namespace NetEmit.CodeDom
             code.WriteLine("using System;");
             code.WriteLine("using System.Reflection;");
             code.WriteLine();
-            code.WriteLine($@"[assembly: AssemblyVersion(""{ass.Version}"")]");
+            code.WriteLine($@"[assembly: AssemblyVersion(""{ass.GetVersion()}"")]");
             return code.ToString();
         }
 
