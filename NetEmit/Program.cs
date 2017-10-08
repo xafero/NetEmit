@@ -1,6 +1,7 @@
 ﻿using NetEmit.API;
 using NetEmit.Cecil;
 using NetEmit.CodeDom;
+using NetEmit.Core;
 using NetEmit.Netfx;
 
 namespace NetEmit
