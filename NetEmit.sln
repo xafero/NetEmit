@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.Netfx", "NetEmit.Ne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.CodeDom", "NetEmit.CodeDom\NetEmit.CodeDom.csproj", "{57B3974D-D137-4C32-BC2B-25DBE167614F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.Cecil", "NetEmit.Cecil\NetEmit.Cecil.csproj", "{D33D8DD6-6D50-4B90-8B6C-487E95CDB18B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{57B3974D-D137-4C32-BC2B-25DBE167614F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57B3974D-D137-4C32-BC2B-25DBE167614F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57B3974D-D137-4C32-BC2B-25DBE167614F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D33D8DD6-6D50-4B90-8B6C-487E95CDB18B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D33D8DD6-6D50-4B90-8B6C-487E95CDB18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D33D8DD6-6D50-4B90-8B6C-487E95CDB18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D33D8DD6-6D50-4B90-8B6C-487E95CDB18B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

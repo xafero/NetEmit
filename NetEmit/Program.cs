@@ -1,4 +1,5 @@
 ﻿using NetEmit.API;
+using NetEmit.Cecil;
 using NetEmit.CodeDom;
 using NetEmit.Netfx;
 
@@ -22,6 +23,15 @@ namespace NetEmit
                 IAssembly ass = new NewAssembly
                 {
                     Name = "TestGen2"
+                };
+                bld.Emit(ass);
+            }
+
+            using (IAssemblyEmitter bld = new CecilEmitter())
+            {
+                IAssembly ass = new NewAssembly
+                {
+                    Name = "TestGen3"
                 };
                 bld.Emit(ass);
             }

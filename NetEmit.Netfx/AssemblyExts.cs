@@ -17,7 +17,5 @@ namespace NetEmit.Netfx
             var attr = new CustomAttributeBuilder(constr, constrArgs, props, propArgs);
             bld.SetCustomAttribute(attr);
         }
-
-        public static Tuple<string, object> Sets(this string key, object value) => Tuple.Create(key, value);
     }
 }
