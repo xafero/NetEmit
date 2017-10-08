@@ -43,7 +43,7 @@ namespace NetEmit.CodeDom
             code.WriteLine("using System;");
             code.WriteLine("using System.Reflection;");
             code.WriteLine();
-            code.WriteLine(@"[assembly: AssemblyVersion(""0.0.0.0"")]");
+            code.WriteLine($@"[assembly: AssemblyVersion(""{ass.Version}"")]");
             return code.ToString();
         }
 
