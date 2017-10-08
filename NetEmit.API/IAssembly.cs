@@ -1,4 +1,6 @@
-﻿namespace NetEmit.API
+﻿using System.Collections.Generic;
+
+namespace NetEmit.API
 {
     public interface IAssembly
     {
@@ -9,5 +11,7 @@
         string FileName { get; set; }
 
         bool IsExe { get; set; }
+
+        ICollection<INamespace> Namespaces { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
+using NetEmit.API;
 
-namespace NetEmit.API
+namespace NetEmit.Core
 {
     public class NewType : IType
     {

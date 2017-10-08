@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using NetEmit.API;
 
-namespace NetEmit.API
+namespace NetEmit.Core
 {
     public class NewAssembly : IAssembly
     {
