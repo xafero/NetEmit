@@ -14,7 +14,19 @@ namespace NetEmit
             {
                 IAssembly ass = new NewAssembly
                 {
-                    Name = "TestGen1"
+                    Name = "TestGen1",
+                    Namespaces =
+                    {
+                        new NewNamespace
+                        {
+                            Types =
+                            {
+                                new NewEnum {Name = "MyE"},
+                                new NewStruct {Name = "MyS"},
+                                new NewDelegate {Name = "MyD"}
+                            }
+                        }
+                    }
                 };
                 bld.Emit(ass);
             }

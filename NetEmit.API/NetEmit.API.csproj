@@ -39,6 +39,7 @@
     <Compile Include="INamespace.cs" />
     <Compile Include="IType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeKind.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
