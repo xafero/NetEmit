@@ -23,7 +23,9 @@ namespace NetEmit
                             {
                                 new NewEnum {Name = "MyE"},
                                 new NewStruct {Name = "MyS"},
-                                new NewDelegate {Name = "MyD"}
+                                new NewDelegate {Name = "MyD"},
+                                new NewInterface{Name="MyI"},
+                                new NewClass{Name="MyC"}
                             }
                         }
                     }

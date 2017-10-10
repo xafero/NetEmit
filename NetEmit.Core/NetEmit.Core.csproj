@@ -34,8 +34,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NewAssembly.cs" />
+    <Compile Include="NewClass.cs" />
     <Compile Include="NewDelegate.cs" />
     <Compile Include="NewEnum.cs" />
+    <Compile Include="NewInterface.cs" />
     <Compile Include="NewNamespace.cs" />
     <Compile Include="NewStruct.cs" />
     <Compile Include="NewType.cs" />

@@ -1,9 +1,15 @@
-﻿namespace NetEmit.Core
+﻿namespace NetEmit.API
 {
     public enum TypeKind
     {
-        Enum,
-        Struct,
-        Delegate
+        Interface = 0,
+
+        Class = 1,
+
+        Struct = 2,
+
+        Delegate = 3,
+
+        Enum = 4
     }
 }

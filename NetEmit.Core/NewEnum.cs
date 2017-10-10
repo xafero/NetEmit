@@ -1,4 +1,6 @@
-﻿namespace NetEmit.Core
+﻿using NetEmit.API;
+
+namespace NetEmit.Core
 {
     public class NewEnum : NewType
     {

@@ -3,9 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using NetEmit.API;
-using NetEmit.Core;
 
 namespace NetEmit.Netfx
 {
@@ -58,21 +56,48 @@ namespace NetEmit.Netfx
                     case TypeKind.Delegate:
                         EmitDelegate(typ, mod);
                         break;
+                    case TypeKind.Interface:
+                        EmitInterface(typ, mod);
+                        break;
+                    case TypeKind.Class:
+                        EmitClass(typ, mod);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException(typ.Kind.ToString());
                 }
         }
 
-        private static void EmitDelegate(IType typ, ModuleBuilder mod)
+        private static void EmitClass(IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public;
+            var cla = mod.DefineType(typ.Name, attr);
+            cla.CreateType();
+        }
+
+        private static void EmitInterface(IType typ, ModuleBuilder mod)
+        {
+            const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Interface
+                | TypeAttributes.Abstract;
+            var intf = mod.DefineType(typ.Name, attr);
+            intf.CreateType();
+        }
+
+        private static void EmitDelegate(IType typ, ModuleBuilder mod)
+        {
+            const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Sealed;
             var under = typeof(MulticastDelegate);
             var dlgt = mod.DefineType(typ.Name, attr, under);
             const MethodAttributes mattr = MethodAttributes.Public;
             const CallingConventions conv = CallingConventions.Standard;
-            var tparm = new[] {typeof(object), typeof(IntPtr)};
+            var tparm = new[] { typeof(object), typeof(IntPtr) };
             var cstr = dlgt.DefineConstructor(mattr, conv, tparm);
             cstr.SetImplementationFlags(MethodImplAttributes.Runtime);
+            var inv = dlgt.DefineMethod("Invoke", MethodAttributes.Public);
+            inv.SetImplementationFlags(MethodImplAttributes.Runtime);
+            var bgi = dlgt.DefineMethod("BeginInvoke", MethodAttributes.Public);
+            bgi.SetImplementationFlags(MethodImplAttributes.Runtime);
+            var ebi = dlgt.DefineMethod("EndInvoke", MethodAttributes.Public);
+            ebi.SetImplementationFlags(MethodImplAttributes.Runtime);
             dlgt.CreateType();
         }
 
