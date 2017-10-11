@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NetEmit.CodeDom</RootNamespace>
     <AssemblyName>NetEmit.CodeDom</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -33,6 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Noaster">
+      <HintPath>..\lib\Noaster.dll</HintPath>
+    </Reference>
+    <Reference Include="Noaster.Api">
+      <HintPath>..\lib\Noaster.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Noaster.Impl">
+      <HintPath>..\lib\Noaster.Impl.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +53,9 @@
       <Project>{F896EDBD-DA8A-4472-8071-D722FBB66E48}</Project>
       <Name>NetEmit.API</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
