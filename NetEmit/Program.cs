@@ -12,6 +12,7 @@ namespace NetEmit
         {
             var nsp = new NewNamespace
             {
+                Name = "Auto.Space",
                 Types =
                 {
                     new NewEnum {Name = "MyE"},

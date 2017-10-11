@@ -48,45 +48,48 @@ namespace NetEmit.Netfx
                 switch (typ.Kind)
                 {
                     case TypeKind.Enum:
-                        EmitEnum(typ, mod);
+                        EmitEnum(nsp, typ, mod);
                         break;
                     case TypeKind.Struct:
-                        EmitStruct(typ, mod);
+                        EmitStruct(nsp, typ, mod);
                         break;
                     case TypeKind.Delegate:
-                        EmitDelegate(typ, mod);
+                        EmitDelegate(nsp, typ, mod);
                         break;
                     case TypeKind.Interface:
-                        EmitInterface(typ, mod);
+                        EmitInterface(nsp, typ, mod);
                         break;
                     case TypeKind.Class:
-                        EmitClass(typ, mod);
+                        EmitClass(nsp, typ, mod);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(typ.Kind.ToString());
                 }
         }
 
-        private static void EmitClass(IType typ, ModuleBuilder mod)
+        private static string GetFqn(INamespace nsp, IType typ)
+            => string.Join(".", nsp.Name, typ.Name);
+
+        private static void EmitClass(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public;
-            var cla = mod.DefineType(typ.Name, attr);
+            var cla = mod.DefineType(GetFqn(nsp, typ), attr);
             cla.CreateType();
         }
 
-        private static void EmitInterface(IType typ, ModuleBuilder mod)
+        private static void EmitInterface(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Interface
                 | TypeAttributes.Abstract;
-            var intf = mod.DefineType(typ.Name, attr);
+            var intf = mod.DefineType(GetFqn(nsp, typ), attr);
             intf.CreateType();
         }
 
-        private static void EmitDelegate(IType typ, ModuleBuilder mod)
+        private static void EmitDelegate(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Sealed;
             var under = typeof(MulticastDelegate);
-            var dlgt = mod.DefineType(typ.Name, attr, under);
+            var dlgt = mod.DefineType(GetFqn(nsp, typ), attr, under);
             const MethodAttributes mattr = MethodAttributes.Public;
             const CallingConventions conv = CallingConventions.Standard;
             var tparm = new[] { typeof(object), typeof(IntPtr) };
@@ -101,19 +104,19 @@ namespace NetEmit.Netfx
             dlgt.CreateType();
         }
 
-        private static void EmitEnum(IType typ, ModuleBuilder mod)
+        private static void EmitEnum(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public;
             var under = typeof(byte);
-            var enm = mod.DefineEnum(typ.Name, attr, under);
+            var enm = mod.DefineEnum(GetFqn(nsp, typ), attr, under);
             enm.CreateType();
         }
 
-        private static void EmitStruct(IType typ, ModuleBuilder mod)
+        private static void EmitStruct(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public;
             var under = typeof(ValueType);
-            var stru = mod.DefineType(typ.Name, attr, under);
+            var stru = mod.DefineType(GetFqn(nsp, typ), attr, under);
             stru.CreateType();
         }
 

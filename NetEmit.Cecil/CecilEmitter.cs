@@ -54,60 +54,60 @@ namespace NetEmit.Cecil
                 switch (typ.Kind)
                 {
                     case TypeKind.Enum:
-                        EmitEnum(typ, mod);
+                        EmitEnum(nsp, typ, mod);
                         break;
                     case TypeKind.Struct:
-                        EmitStruct(typ, mod);
+                        EmitStruct(nsp, typ, mod);
                         break;
                     case TypeKind.Delegate:
-                        EmitDelegate(typ, mod);
+                        EmitDelegate(nsp, typ, mod);
                         break;
                     case TypeKind.Interface:
-                        EmitInterface(typ, mod);
+                        EmitInterface(nsp, typ, mod);
                         break;
                     case TypeKind.Class:
-                        EmitClass(typ, mod);
+                        EmitClass(nsp, typ, mod);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(typ.Kind.ToString());
                 }
         }
 
-        private static void EmitEnum(IType typ, ModuleDefinition mod)
+        private static void EmitEnum(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var enmRef = mod.ImportReference(typeof(Enum));
-            var enm = new TypeDefinition(null, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, enmRef);
+            var enm = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, enmRef);
             var underRef = mod.ImportReference(typeof(byte));
             enm.Fields.Add(new FieldDefinition("value__", FieldAttributes.Private | FieldAttributes.RTSpecialName
                                                           | FieldAttributes.SpecialName, underRef));
             mod.Types.Add(enm);
         }
 
-        private static void EmitStruct(IType typ, ModuleDefinition mod)
+        private static void EmitStruct(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var valRef = mod.ImportReference(typeof(ValueType));
-            var stru = new TypeDefinition(null, typ.Name, TypeAttributes.Public, valRef);
+            var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public, valRef);
             mod.Types.Add(stru);
         }
 
-        private static void EmitDelegate(IType typ, ModuleDefinition mod)
+        private static void EmitDelegate(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var dlgRef = mod.ImportReference(typeof(MulticastDelegate));
-            var dlg = new TypeDefinition(null, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, dlgRef);
+            var dlg = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, dlgRef);
             mod.Types.Add(dlg);
         }
 
-        private static void EmitInterface(IType typ, ModuleDefinition mod)
+        private static void EmitInterface(INamespace nsp, IType typ, ModuleDefinition mod)
         {
-            var intf = new TypeDefinition(null, typ.Name,
+            var intf = new TypeDefinition(nsp.Name, typ.Name,
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
             mod.Types.Add(intf);
         }
 
-        private static void EmitClass(IType typ, ModuleDefinition mod)
+        private static void EmitClass(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var baseRef = mod.ImportReference(typeof(object));
-            var cla = new TypeDefinition(null, typ.Name, TypeAttributes.Public, baseRef);
+            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public, baseRef);
             mod.Types.Add(cla);
         }
 
