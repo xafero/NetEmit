@@ -8,7 +8,7 @@ namespace NetEmit.Cecil
 {
     public class CecilEmitter : IAssemblyEmitter
     {
-        public void Emit(IAssembly ass)
+        public string Emit(IAssembly ass)
         {
             var ver = Version.Parse(ass.GetVersion());
             var assName = new AssemblyNameDefinition(ass.Name, ver)
@@ -30,12 +30,11 @@ namespace NetEmit.Cecil
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
-                    var wparms = new WriterParameters {WriteSymbols = false};
+                    var wparms = new WriterParameters { WriteSymbols = false };
                     dyn.Write(file, wparms);
                 }
             }
-
-            Console.WriteLine(file);
+            return file;
         }
 
         private static void Emit(IAssembly ass, AssemblyDefinition bld)
@@ -86,7 +85,9 @@ namespace NetEmit.Cecil
         private static void EmitStruct(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var valRef = mod.ImportReference(typeof(ValueType));
-            var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public, valRef);
+            var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
+                | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
+                | TypeAttributes.BeforeFieldInit, valRef);
             mod.Types.Add(stru);
         }
 
@@ -107,7 +108,7 @@ namespace NetEmit.Cecil
         private static void EmitClass(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var baseRef = mod.ImportReference(typeof(object));
-            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public, baseRef);
+            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.BeforeFieldInit, baseRef);
             mod.Types.Add(cla);
         }
 

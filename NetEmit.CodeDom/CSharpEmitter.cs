@@ -20,7 +20,7 @@ namespace NetEmit.CodeDom
             Provider = new CSharpCodeProvider();
         }
 
-        public void Emit(IAssembly ass)
+        public string Emit(IAssembly ass)
         {
             var file = Path.GetFullPath(ass.GetFileName());
             var parms = new CompilerParameters
@@ -36,9 +36,7 @@ namespace NetEmit.CodeDom
             var dyn = results.CompiledAssembly;
             if (dyn == null)
                 throw new InvalidOperationException(ToText(results));
-            var path = Path.GetFullPath(dyn.Location ?? dyn.CodeBase);
-
-            Console.WriteLine(path);
+            return Path.GetFullPath(results.PathToAssembly ?? dyn.Location ?? dyn.CodeBase);
         }
 
         private static string GenerateMeta(IAssembly ass)

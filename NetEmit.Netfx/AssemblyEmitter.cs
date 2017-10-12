@@ -16,7 +16,7 @@ namespace NetEmit.Netfx
             Domain = AppDomain.CurrentDomain;
         }
 
-        public void Emit(IAssembly ass)
+        public string Emit(IAssembly ass)
         {
             var assName = new AssemblyName(ass.Name)
             {
@@ -28,8 +28,7 @@ namespace NetEmit.Netfx
             var dyn = Domain.DefineDynamicAssembly(assName, assAccess, dir);
             Emit(ass, dyn);
             dyn.Save(Path.GetFileName(file));
-
-            Console.WriteLine(file);
+            return file;
         }
 
         private static void Emit(IAssembly ass, AssemblyBuilder bld)
