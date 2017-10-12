@@ -15,7 +15,7 @@ namespace NetEmit.Cecil
             {
                 HashAlgorithm = AssemblyHashAlgorithm.SHA1
             };
-            var moduleName = ass.GetFileName();
+            var moduleName = Path.GetFileName(ass.GetFileName());
             var file = Path.GetFullPath(ass.GetFileName());
             using (var resolver = new DefaultAssemblyResolver())
             {
@@ -30,7 +30,7 @@ namespace NetEmit.Cecil
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
-                    var wparms = new WriterParameters { WriteSymbols = false };
+                    var wparms = new WriterParameters {WriteSymbols = false};
                     dyn.Write(file, wparms);
                 }
             }
@@ -86,8 +86,8 @@ namespace NetEmit.Cecil
         {
             var valRef = mod.ImportReference(typeof(ValueType));
             var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
-                | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
-                | TypeAttributes.BeforeFieldInit, valRef);
+                                                              | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
+                                                              | TypeAttributes.BeforeFieldInit, valRef);
             mod.Types.Add(stru);
         }
 
@@ -108,7 +108,8 @@ namespace NetEmit.Cecil
         private static void EmitClass(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var baseRef = mod.ImportReference(typeof(object));
-            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.BeforeFieldInit, baseRef);
+            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
+                baseRef);
             mod.Types.Add(cla);
         }
 
