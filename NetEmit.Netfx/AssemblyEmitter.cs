@@ -36,7 +36,8 @@ namespace NetEmit.Netfx
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(true)
             );
-            var mod = bld.DefineDynamicModule(ass.GetFileName());
+            var path = Path.GetFileName(ass.GetFileName());
+            var mod = bld.DefineDynamicModule(path ?? ass.GetFileName());
             foreach (var nsp in ass.Namespaces)
                 Emit(nsp, mod);
         }
@@ -79,7 +80,7 @@ namespace NetEmit.Netfx
         private static void EmitInterface(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Interface
-                | TypeAttributes.Abstract;
+                                        | TypeAttributes.Abstract;
             var intf = mod.DefineType(GetFqn(nsp, typ), attr);
             intf.CreateType();
         }
@@ -91,7 +92,7 @@ namespace NetEmit.Netfx
             var dlgt = mod.DefineType(GetFqn(nsp, typ), attr, under);
             const MethodAttributes mattr = MethodAttributes.Public;
             const CallingConventions conv = CallingConventions.Standard;
-            var tparm = new[] { typeof(object), typeof(IntPtr) };
+            var tparm = new[] {typeof(object), typeof(IntPtr)};
             var cstr = dlgt.DefineConstructor(mattr, conv, tparm);
             cstr.SetImplementationFlags(MethodImplAttributes.Runtime);
             var inv = dlgt.DefineMethod("Invoke", MethodAttributes.Public);

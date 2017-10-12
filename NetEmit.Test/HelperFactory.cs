@@ -6,9 +6,15 @@ namespace NetEmit.Test
     {
         public static ILHelper CreateIlHelper()
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                return new WindowsIlHelper();
-            throw new InvalidOperationException("No helper found!");
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                    return new WindowsIlHelper();
+                case PlatformID.Unix:
+                    return new UnixIlHelper();
+                default:
+                    throw new InvalidOperationException("No helper found!");
+            }
         }
     }
 }

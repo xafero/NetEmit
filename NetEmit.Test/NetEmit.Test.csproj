@@ -46,6 +46,7 @@
     <Compile Include="HelperFactory.cs" />
     <Compile Include="ILHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnixIlHelper.cs" />
     <Compile Include="WindowsILHelper.cs" />
   </ItemGroup>
   <ItemGroup>
