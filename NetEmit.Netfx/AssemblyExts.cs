@@ -24,5 +24,18 @@ namespace NetEmit.Netfx
             const MethodAttributes cattr = MethodAttributes.Public | MethodAttributes.HideBySig;
             cla.DefineDefaultConstructor(cattr);
         }
+
+        public static void FixUnderlyingVisibility(this EnumBuilder enm)
+        {
+            var fld = enm.UnderlyingField;
+            var type = typeof(FieldBuilder);
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var privAttr = type.GetFields(flags).FirstOrDefault(f => f.Name == "attrs");
+            if (privAttr == null)
+                return;
+            const FieldAttributes attrs = FieldAttributes.Public | FieldAttributes.SpecialName
+                                          | FieldAttributes.RTSpecialName;
+            privAttr.SetValue(fld, attrs);
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace NetEmit.CodeDom
                 IncludeDebugInformation = false,
                 OutputAssembly = file
             };
-            var sources = new List<string> { GenerateMeta(ass) };
+            var sources = new List<string> {GenerateMeta(ass)};
             sources.AddRange(GenerateCode(ass));
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
             var dyn = results.CompiledAssembly;
@@ -44,7 +44,9 @@ namespace NetEmit.CodeDom
             var code = new StringWriter();
             code.WriteLine("using System;");
             code.WriteLine("using System.Reflection;");
+            code.WriteLine("using System.Runtime.CompilerServices;");
             code.WriteLine();
+            code.WriteLine($@"[assembly: CompilationRelaxations(8)]");
             code.WriteLine($@"[assembly: AssemblyVersion(""{ass.GetVersion()}"")]");
             return code.ToString();
         }

@@ -93,7 +93,7 @@ namespace NetEmit.Netfx
             var under = typeof(MulticastDelegate);
             var dlgt = mod.DefineType(GetFqn(nsp, typ), attr, under);
             const CallingConventions conv = CallingConventions.Standard;
-            var tparm = new[] { typeof(object), typeof(IntPtr) };
+            var tparm = new[] {typeof(object), typeof(IntPtr)};
             const MethodAttributes cattr = MethodAttributes.Public | MethodAttributes.HideBySig;
             var cstr = dlgt.DefineConstructor(cattr, conv, tparm);
             cstr.DefineParameter(1, ParameterAttributes.None, "object");
@@ -104,11 +104,11 @@ namespace NetEmit.Netfx
             var inv = dlgt.DefineMethod("Invoke", mattr);
             inv.SetImplementationFlags(MethodImplAttributes.Runtime);
             var bgi = dlgt.DefineMethod("BeginInvoke", mattr, typeof(IAsyncResult),
-                new[] { typeof(AsyncCallback), typeof(object) });
+                new[] {typeof(AsyncCallback), typeof(object)});
             bgi.DefineParameter(1, ParameterAttributes.None, "callback");
             bgi.DefineParameter(2, ParameterAttributes.None, "object");
             bgi.SetImplementationFlags(MethodImplAttributes.Runtime);
-            var ebi = dlgt.DefineMethod("EndInvoke", mattr, typeof(void), new[] { typeof(IAsyncResult) });
+            var ebi = dlgt.DefineMethod("EndInvoke", mattr, typeof(void), new[] {typeof(IAsyncResult)});
             ebi.DefineParameter(1, ParameterAttributes.None, "result");
             ebi.SetImplementationFlags(MethodImplAttributes.Runtime);
             dlgt.CreateType();
@@ -119,6 +119,7 @@ namespace NetEmit.Netfx
             const TypeAttributes attr = TypeAttributes.Public;
             var under = typeof(int);
             var enm = mod.DefineEnum(GetFqn(nsp, typ), attr, under);
+            enm.FixUnderlyingVisibility();
             enm.CreateType();
         }
 
