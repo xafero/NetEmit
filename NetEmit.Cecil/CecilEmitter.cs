@@ -109,8 +109,9 @@ namespace NetEmit.Cecil
         private static void EmitClass(INamespace nsp, IType typ, ModuleDefinition mod)
         {
             var baseRef = mod.ImportReference(typeof(object));
-            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.BeforeFieldInit,
-                baseRef);
+            var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
+                | TypeAttributes.BeforeFieldInit, baseRef);
+            cla.AddConstructor(mod);
             mod.Types.Add(cla);
         }
 

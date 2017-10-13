@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace NetEmit.Cecil
 {
@@ -31,6 +32,20 @@ namespace NetEmit.Cecil
                 attr.Properties.Add(pa);
             }
             bld.CustomAttributes.Add(attr);
+        }
+
+        public static void AddConstructor(this TypeDefinition cla, ModuleDefinition mod)
+        {
+            var voidRef = mod.ImportReference(typeof(void));
+            const MethodAttributes cattr = MethodAttributes.Public | MethodAttributes.HideBySig
+                                           | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+            var cstr = new MethodDefinition(".ctor", cattr, voidRef);
+            var ils = cstr.Body.GetILProcessor();
+            ils.Append(ils.Create(OpCodes.Ldarg_0));
+            var objCstr = typeof(object).GetConstructors().First();
+            ils.Append(ils.Create(OpCodes.Call, mod.ImportReference(objCstr)));
+            ils.Append(ils.Create(OpCodes.Ret));
+            cla.Methods.Add(cstr);
         }
     }
 }

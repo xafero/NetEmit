@@ -22,7 +22,7 @@ namespace NetEmit.Test
             => File.WriteAllLines(file, File.ReadAllLines(file, E).Where(IsNeeded), E);
 
         private static bool IsNeeded(string line)
-            => new[] { "// MVID:", "// Image base:", ".imagebase 0x" }
-            .All(l => !line.Contains(l));
+            => new[] {"// MVID:", "// Image base:", ".imagebase 0x", ".maxstack  "}
+                .All(l => !line.Contains(l));
     }
 }

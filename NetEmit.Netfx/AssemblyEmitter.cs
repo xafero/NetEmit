@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -75,6 +76,7 @@ namespace NetEmit.Netfx
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.BeforeFieldInit;
             var cla = mod.DefineType(GetFqn(nsp, typ), attr);
+            cla.AddConstructor();
             cla.CreateType();
         }
 
