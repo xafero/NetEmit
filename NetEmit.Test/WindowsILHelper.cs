@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace NetEmit.Test
 {
@@ -13,5 +15,14 @@ namespace NetEmit.Test
 
         public Tuple<string, string> GetDasmCmd(string file, string il)
             => Tuple.Create($"{Escape(LocateDasm())}", $"{Escape(file)} /out={Escape(il)} /utf8 /source");
+
+        private static readonly Encoding E = Encoding.UTF8;
+
+        public void Filter(string file)
+            => File.WriteAllLines(file, File.ReadAllLines(file, E).Where(IsNeeded), E);
+
+        private static bool IsNeeded(string line)
+            => new[] { "// MVID:", "// Image base:", ".imagebase 0x" }
+            .All(l => !line.Contains(l));
     }
 }

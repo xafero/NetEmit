@@ -56,6 +56,7 @@ namespace NetEmit.Test
             var dasm = Helper.GetDasmCmd(file, ilFile);
             using (var proc = Process.Start(new ProcessStartInfo(dasm.Item1, dasm.Item2)))
                 proc?.WaitForExit();
+            Helper.Filter(ilFile);
             if (File.Exists(targetFile))
                 File.Delete(targetFile);
             File.Move(file, file = targetFile);

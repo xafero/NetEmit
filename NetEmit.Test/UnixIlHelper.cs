@@ -8,5 +8,10 @@ namespace NetEmit.Test
 
         public Tuple<string, string> GetDasmCmd(string file, string il)
             => Tuple.Create("monodis", $"--output={Escape(il)} {Escape(file)}");
+
+        public void Filter(string file)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

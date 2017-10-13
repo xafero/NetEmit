@@ -73,7 +73,7 @@ namespace NetEmit.Netfx
 
         private static void EmitClass(INamespace nsp, IType typ, ModuleBuilder mod)
         {
-            const TypeAttributes attr = TypeAttributes.Public;
+            const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.BeforeFieldInit;
             var cla = mod.DefineType(GetFqn(nsp, typ), attr);
             cla.CreateType();
         }
