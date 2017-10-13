@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit", "NetEmit\NetEmit.csproj", "{DD666620-6F72-4BCC-A701-204F1BF03C72}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.Test", "NetEmit.Test\NetEmit.Test.csproj", "{D807D98C-AD6D-451D-B2FA-85372949B398}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetEmit.API", "NetEmit.API\NetEmit.API.csproj", "{F896EDBD-DA8A-4472-8071-D722FBB66E48}"
@@ -23,10 +21,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DD666620-6F72-4BCC-A701-204F1BF03C72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD666620-6F72-4BCC-A701-204F1BF03C72}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD666620-6F72-4BCC-A701-204F1BF03C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD666620-6F72-4BCC-A701-204F1BF03C72}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D807D98C-AD6D-451D-B2FA-85372949B398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D807D98C-AD6D-451D-B2FA-85372949B398}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D807D98C-AD6D-451D-B2FA-85372949B398}.Release|Any CPU.ActiveCfg = Release|Any CPU
