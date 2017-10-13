@@ -77,8 +77,8 @@ namespace NetEmit.Cecil
         {
             var enmRef = mod.ImportReference(typeof(Enum));
             var enm = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, enmRef);
-            var underRef = mod.ImportReference(typeof(byte));
-            enm.Fields.Add(new FieldDefinition("value__", FieldAttributes.Private | FieldAttributes.RTSpecialName
+            var underRef = mod.ImportReference(typeof(int));
+            enm.Fields.Add(new FieldDefinition("value__", FieldAttributes.Public | FieldAttributes.RTSpecialName
                                                           | FieldAttributes.SpecialName, underRef));
             mod.Types.Add(enm);
         }

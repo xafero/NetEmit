@@ -110,14 +110,17 @@ namespace NetEmit.Netfx
         private static void EmitEnum(INamespace nsp, IType typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public;
-            var under = typeof(byte);
+            var under = typeof(int);
             var enm = mod.DefineEnum(GetFqn(nsp, typ), attr, under);
             enm.CreateType();
         }
 
         private static void EmitStruct(INamespace nsp, IType typ, ModuleBuilder mod)
         {
-            const TypeAttributes attr = TypeAttributes.Public;
+            const TypeAttributes attr = TypeAttributes.Public
+                                        | TypeAttributes.SequentialLayout
+                                        | TypeAttributes.Sealed
+                                        | TypeAttributes.BeforeFieldInit;
             var under = typeof(ValueType);
             var stru = mod.DefineType(GetFqn(nsp, typ), attr, under);
             stru.CreateType();
