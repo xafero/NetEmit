@@ -100,7 +100,7 @@ namespace NetEmit.Test
                     WriteDiff(first.Value, second.Value, diffFile, ref ins, ref del, ref chg);
                     Console.WriteLine($"{Path.GetFileName(diffFile)} ({ins}+, {del}-, {chg}~)");
                     Assert.IsTrue(File.Exists(diffFile));
-                    Assert.IsTrue(new FileInfo(diffFile).Length <= 10000);
+                    Assert.AreEqual(0, new FileInfo(diffFile).Length);
                 }
         }
 
@@ -123,6 +123,8 @@ namespace NetEmit.Test
                             diffFile.Write("- ");
                             deletes++;
                             break;
+                        case ChangeType.Unchanged:
+                            continue;
                         default:
                             diffFile.Write("  ");
                             changes++;

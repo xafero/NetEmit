@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -93,16 +92,24 @@ namespace NetEmit.Netfx
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Sealed;
             var under = typeof(MulticastDelegate);
             var dlgt = mod.DefineType(GetFqn(nsp, typ), attr, under);
-            const MethodAttributes mattr = MethodAttributes.Public;
             const CallingConventions conv = CallingConventions.Standard;
             var tparm = new[] { typeof(object), typeof(IntPtr) };
-            var cstr = dlgt.DefineConstructor(mattr, conv, tparm);
+            const MethodAttributes cattr = MethodAttributes.Public | MethodAttributes.HideBySig;
+            var cstr = dlgt.DefineConstructor(cattr, conv, tparm);
+            cstr.DefineParameter(1, ParameterAttributes.None, "object");
+            cstr.DefineParameter(2, ParameterAttributes.None, "method");
             cstr.SetImplementationFlags(MethodImplAttributes.Runtime);
-            var inv = dlgt.DefineMethod("Invoke", MethodAttributes.Public);
+            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
+                                           MethodAttributes.NewSlot | MethodAttributes.Virtual;
+            var inv = dlgt.DefineMethod("Invoke", mattr);
             inv.SetImplementationFlags(MethodImplAttributes.Runtime);
-            var bgi = dlgt.DefineMethod("BeginInvoke", MethodAttributes.Public);
+            var bgi = dlgt.DefineMethod("BeginInvoke", mattr, typeof(IAsyncResult),
+                new[] { typeof(AsyncCallback), typeof(object) });
+            bgi.DefineParameter(1, ParameterAttributes.None, "callback");
+            bgi.DefineParameter(2, ParameterAttributes.None, "object");
             bgi.SetImplementationFlags(MethodImplAttributes.Runtime);
-            var ebi = dlgt.DefineMethod("EndInvoke", MethodAttributes.Public);
+            var ebi = dlgt.DefineMethod("EndInvoke", mattr, typeof(void), new[] { typeof(IAsyncResult) });
+            ebi.DefineParameter(1, ParameterAttributes.None, "result");
             ebi.SetImplementationFlags(MethodImplAttributes.Runtime);
             dlgt.CreateType();
         }

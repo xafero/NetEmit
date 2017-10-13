@@ -34,18 +34,27 @@ namespace NetEmit.Cecil
             bld.CustomAttributes.Add(attr);
         }
 
-        public static void AddConstructor(this TypeDefinition cla, ModuleDefinition mod)
+        public static void AddConstructor(this TypeDefinition cla, ModuleDefinition mod,
+            object body, params Tuple<string, Type>[] args)
         {
             var voidRef = mod.ImportReference(typeof(void));
             const MethodAttributes cattr = MethodAttributes.Public | MethodAttributes.HideBySig
                                            | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
             var cstr = new MethodDefinition(".ctor", cattr, voidRef);
+            foreach (var arg in args)
+                cstr.Parameters.Add(new ParameterDefinition(arg.Item1,
+                    ParameterAttributes.None, mod.ImportReference(arg.Item2)));
+            cla.Methods.Add(cstr);
+            if (body == null)
+            {
+                cstr.IsRuntime = true;
+                return;
+            }
             var ils = cstr.Body.GetILProcessor();
             ils.Append(ils.Create(OpCodes.Ldarg_0));
             var objCstr = typeof(object).GetConstructors().First();
             ils.Append(ils.Create(OpCodes.Call, mod.ImportReference(objCstr)));
             ils.Append(ils.Create(OpCodes.Ret));
-            cla.Methods.Add(cstr);
         }
     }
 }
