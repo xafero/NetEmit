@@ -33,6 +33,7 @@ namespace NetEmit.Netfx
 
         private static void Emit(IAssembly ass, AssemblyBuilder bld)
         {
+            bld.AddAttribute<CompilationRelaxationsAttribute>(8);
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(true)
             );
@@ -92,7 +93,7 @@ namespace NetEmit.Netfx
             var dlgt = mod.DefineType(GetFqn(nsp, typ), attr, under);
             const MethodAttributes mattr = MethodAttributes.Public;
             const CallingConventions conv = CallingConventions.Standard;
-            var tparm = new[] {typeof(object), typeof(IntPtr)};
+            var tparm = new[] { typeof(object), typeof(IntPtr) };
             var cstr = dlgt.DefineConstructor(mattr, conv, tparm);
             cstr.SetImplementationFlags(MethodImplAttributes.Runtime);
             var inv = dlgt.DefineMethod("Invoke", MethodAttributes.Public);

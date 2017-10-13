@@ -30,7 +30,7 @@ namespace NetEmit.Cecil
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
-                    var wparms = new WriterParameters {WriteSymbols = false};
+                    var wparms = new WriterParameters { WriteSymbols = false };
                     dyn.Write(file, wparms);
                 }
             }
@@ -39,6 +39,7 @@ namespace NetEmit.Cecil
 
         private static void Emit(IAssembly ass, AssemblyDefinition bld)
         {
+            bld.AddAttribute<CompilationRelaxationsAttribute>(8);
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(true)
             );
