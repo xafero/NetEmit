@@ -16,7 +16,7 @@ namespace NetEmit.Netfx
             Domain = AppDomain.CurrentDomain;
         }
 
-        public string Emit(IAssembly ass)
+        public string Emit(AssemblyDef ass)
         {
             var assName = new AssemblyName(ass.Name)
             {
@@ -31,7 +31,7 @@ namespace NetEmit.Netfx
             return file;
         }
 
-        private static void Emit(IAssembly ass, AssemblyBuilder bld)
+        private static void Emit(AssemblyDef ass, AssemblyBuilder bld)
         {
             bld.AddAttribute<CompilationRelaxationsAttribute>(8);
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
@@ -43,7 +43,7 @@ namespace NetEmit.Netfx
                 Emit(nsp, mod);
         }
 
-        private static void Emit(INamespace nsp, ModuleBuilder mod)
+        private static void Emit(NamespaceDef nsp, ModuleBuilder mod)
         {
             foreach (var typ in nsp.Types)
                 switch (typ.Kind)
@@ -68,10 +68,10 @@ namespace NetEmit.Netfx
                 }
         }
 
-        private static string GetFqn(INamespace nsp, IType typ)
+        private static string GetFqn(NamespaceDef nsp, TypeDef typ)
             => string.Join(".", nsp.Name, typ.Name);
 
-        private static void EmitClass(INamespace nsp, IType typ, ModuleBuilder mod)
+        private static void EmitClass(NamespaceDef nsp, TypeDef typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.BeforeFieldInit;
             var cla = mod.DefineType(GetFqn(nsp, typ), attr);
@@ -79,7 +79,7 @@ namespace NetEmit.Netfx
             cla.CreateType();
         }
 
-        private static void EmitInterface(INamespace nsp, IType typ, ModuleBuilder mod)
+        private static void EmitInterface(NamespaceDef nsp, TypeDef typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Interface
                                         | TypeAttributes.Abstract;
@@ -87,7 +87,7 @@ namespace NetEmit.Netfx
             intf.CreateType();
         }
 
-        private static void EmitDelegate(INamespace nsp, IType typ, ModuleBuilder mod)
+        private static void EmitDelegate(NamespaceDef nsp, TypeDef typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Sealed;
             var under = typeof(MulticastDelegate);
@@ -114,7 +114,7 @@ namespace NetEmit.Netfx
             dlgt.CreateType();
         }
 
-        private static void EmitEnum(INamespace nsp, IType typ, ModuleBuilder mod)
+        private static void EmitEnum(NamespaceDef nsp, TypeDef typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public;
             var under = typeof(int);
@@ -123,7 +123,7 @@ namespace NetEmit.Netfx
             enm.CreateType();
         }
 
-        private static void EmitStruct(INamespace nsp, IType typ, ModuleBuilder mod)
+        private static void EmitStruct(NamespaceDef nsp, TypeDef typ, ModuleBuilder mod)
         {
             const TypeAttributes attr = TypeAttributes.Public
                                         | TypeAttributes.SequentialLayout

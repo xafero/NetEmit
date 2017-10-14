@@ -4,6 +4,6 @@ namespace NetEmit.API
 {
     public interface IAssemblyEmitter : IDisposable
     {
-        string Emit(IAssembly ass);
+        string Emit(AssemblyDef ass);
     }
 }

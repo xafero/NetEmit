@@ -9,7 +9,6 @@ using DiffPlex.DiffBuilder.Model;
 using NetEmit.API;
 using NetEmit.Cecil;
 using NetEmit.CodeDom;
-using NetEmit.Core;
 using NetEmit.Netfx;
 using NUnit.Framework;
 
@@ -20,22 +19,22 @@ namespace NetEmit.Test
     {
         private static readonly ILHelper Helper = HelperFactory.CreateIlHelper();
 
-        private static IAssembly BuildTestModel()
-            => new NewAssembly
+        private static AssemblyDef BuildTestModel()
+            => new AssemblyDef
             {
                 Name = "TestMod",
                 Namespaces =
                 {
-                    new NewNamespace
+                    new NamespaceDef
                     {
                         Name = "Auto.Space",
                         Types =
                         {
-                            new NewEnum {Name = "MyE"},
-                            new NewStruct {Name = "MyS"},
-                            new NewDelegate {Name = "MyD"},
-                            new NewInterface {Name = "MyI"},
-                            new NewClass {Name = "MyC"}
+                            new EnumDef {Name = "MyE"},
+                            new StructDef {Name = "MyS"},
+                            new DelegateDef {Name = "MyD"},
+                            new InterfaceDef {Name = "MyI"},
+                            new ClassDef {Name = "MyC"}
                         }
                     }
                 }

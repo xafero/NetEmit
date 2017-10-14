@@ -21,7 +21,7 @@ namespace NetEmit.CodeDom
             Provider = new CSharpCodeProvider();
         }
 
-        public string Emit(IAssembly ass)
+        public string Emit(AssemblyDef ass)
         {
             var file = Path.GetFullPath(ass.GetFileName());
             var parms = new CompilerParameters
@@ -50,7 +50,7 @@ namespace NetEmit.CodeDom
             File.WriteAllText(csPath, code, Encoding.UTF8);
         }
 
-        private static string GenerateMeta(IAssembly ass)
+        private static string GenerateMeta(AssemblyDef ass)
         {
             var code = new StringWriter();
             code.WriteLine("using System;");
@@ -62,7 +62,7 @@ namespace NetEmit.CodeDom
             return code.ToString();
         }
 
-        private static IEnumerable<string> GenerateCode(IAssembly ass)
+        private static IEnumerable<string> GenerateCode(AssemblyDef ass)
         {
             foreach (var nsp in ass.Namespaces)
             {
@@ -73,7 +73,7 @@ namespace NetEmit.CodeDom
             }
         }
 
-        private static void GenerateType(NA.INamespace nsp, IType typ)
+        private static void GenerateType(NA.INamespace nsp, TypeDef typ)
         {
             switch (typ.Kind)
             {
@@ -97,27 +97,27 @@ namespace NetEmit.CodeDom
             }
         }
 
-        private static void EmitClass(NA.INamespace nsp, IType typ)
+        private static void EmitClass(NA.INamespace nsp, TypeDef typ)
         {
             var c = N.Create<NA.IClass>(typ.Name, nsp).With(NA.Visibility.Public);
         }
 
-        private static void EmitInterface(NA.INamespace nsp, IType typ)
+        private static void EmitInterface(NA.INamespace nsp, TypeDef typ)
         {
             var i = N.Create<NA.IInterface>(typ.Name, nsp).With(NA.Visibility.Public);
         }
 
-        private static void EmitDelegate(NA.INamespace nsp, IType typ)
+        private static void EmitDelegate(NA.INamespace nsp, TypeDef typ)
         {
             var d = N.Create<NA.IDelegate>(typ.Name, nsp).With(NA.Visibility.Public);
         }
 
-        private static void EmitStruct(NA.INamespace nsp, IType typ)
+        private static void EmitStruct(NA.INamespace nsp, TypeDef typ)
         {
             var s = N.Create<NA.IStruct>(typ.Name, nsp).With(NA.Visibility.Public);
         }
 
-        private static void EmitEnum(NA.INamespace nsp, IType typ)
+        private static void EmitEnum(NA.INamespace nsp, TypeDef typ)
         {
             var e = N.Create<NA.IEnum>(typ.Name, nsp).With(NA.Visibility.Public);
         }

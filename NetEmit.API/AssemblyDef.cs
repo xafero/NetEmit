@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using NetEmit.API;
 
-namespace NetEmit.Core
+namespace NetEmit.API
 {
-    public class NewAssembly : IAssembly
+    public class AssemblyDef
     {
         public string Name { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 8);
 
@@ -14,6 +13,6 @@ namespace NetEmit.Core
 
         public bool IsExe { get; set; }
 
-        public ICollection<INamespace> Namespaces { get; set; } = new SortedSet<INamespace>();
+        public ICollection<NamespaceDef> Namespaces { get; } = new SortedSet<NamespaceDef>();
     }
 }

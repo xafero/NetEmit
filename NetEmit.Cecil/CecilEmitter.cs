@@ -8,7 +8,7 @@ namespace NetEmit.Cecil
 {
     public class CecilEmitter : IAssemblyEmitter
     {
-        public string Emit(IAssembly ass)
+        public string Emit(AssemblyDef ass)
         {
             var ver = Version.Parse(ass.GetVersion());
             var assName = new AssemblyNameDefinition(ass.Name, ver)
@@ -30,14 +30,14 @@ namespace NetEmit.Cecil
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
-                    var wparms = new WriterParameters { WriteSymbols = false };
+                    var wparms = new WriterParameters {WriteSymbols = false};
                     dyn.Write(file, wparms);
                 }
             }
             return file;
         }
 
-        private static void Emit(IAssembly ass, AssemblyDefinition bld)
+        private static void Emit(AssemblyDef ass, AssemblyDefinition bld)
         {
             bld.AddAttribute<CompilationRelaxationsAttribute>(8);
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
@@ -48,7 +48,7 @@ namespace NetEmit.Cecil
                 Emit(nsp, mod);
         }
 
-        private static void Emit(INamespace nsp, ModuleDefinition mod)
+        private static void Emit(NamespaceDef nsp, ModuleDefinition mod)
         {
             foreach (var typ in nsp.Types)
                 switch (typ.Kind)
@@ -73,7 +73,7 @@ namespace NetEmit.Cecil
                 }
         }
 
-        private static void EmitEnum(INamespace nsp, IType typ, ModuleDefinition mod)
+        private static void EmitEnum(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
         {
             var enmRef = mod.ImportReference(typeof(Enum));
             var enm = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, enmRef);
@@ -83,7 +83,7 @@ namespace NetEmit.Cecil
             mod.Types.Add(enm);
         }
 
-        private static void EmitStruct(INamespace nsp, IType typ, ModuleDefinition mod)
+        private static void EmitStruct(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
         {
             var valRef = mod.ImportReference(typeof(ValueType));
             var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
@@ -92,7 +92,7 @@ namespace NetEmit.Cecil
             mod.Types.Add(stru);
         }
 
-        private static void EmitDelegate(INamespace nsp, IType typ, ModuleDefinition mod)
+        private static void EmitDelegate(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
         {
             var voidRef = mod.ImportReference(typeof(void));
             var dlgRef = mod.ImportReference(typeof(MulticastDelegate));
@@ -101,34 +101,34 @@ namespace NetEmit.Cecil
                 Tuple.Create("method", typeof(IntPtr)));
             const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
                                            MethodAttributes.NewSlot | MethodAttributes.Virtual;
-            var invMeth = new MethodDefinition("Invoke", mattr, voidRef) { IsRuntime = true };
+            var invMeth = new MethodDefinition("Invoke", mattr, voidRef) {IsRuntime = true};
             dlg.Methods.Add(invMeth);
             var arr = mod.ImportReference(typeof(IAsyncResult));
-            var begMeth = new MethodDefinition("BeginInvoke", mattr, arr) { IsRuntime = true };
-            var parm = new ParameterDefinition(mod.ImportReference(typeof(AsyncCallback))) { Name = "callback" };
+            var begMeth = new MethodDefinition("BeginInvoke", mattr, arr) {IsRuntime = true};
+            var parm = new ParameterDefinition(mod.ImportReference(typeof(AsyncCallback))) {Name = "callback"};
             begMeth.Parameters.Add(parm);
-            parm = new ParameterDefinition(mod.ImportReference(typeof(object))) { Name = "object" };
+            parm = new ParameterDefinition(mod.ImportReference(typeof(object))) {Name = "object"};
             begMeth.Parameters.Add(parm);
             dlg.Methods.Add(begMeth);
-            var endMeth = new MethodDefinition("EndInvoke", mattr, voidRef) { IsRuntime = true };
-            parm = new ParameterDefinition(mod.ImportReference(typeof(IAsyncResult))) { Name = "result" };
+            var endMeth = new MethodDefinition("EndInvoke", mattr, voidRef) {IsRuntime = true};
+            parm = new ParameterDefinition(mod.ImportReference(typeof(IAsyncResult))) {Name = "result"};
             endMeth.Parameters.Add(parm);
             dlg.Methods.Add(endMeth);
             mod.Types.Add(dlg);
         }
 
-        private static void EmitInterface(INamespace nsp, IType typ, ModuleDefinition mod)
+        private static void EmitInterface(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
         {
             var intf = new TypeDefinition(nsp.Name, typ.Name,
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
             mod.Types.Add(intf);
         }
 
-        private static void EmitClass(INamespace nsp, IType typ, ModuleDefinition mod)
+        private static void EmitClass(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
         {
             var baseRef = mod.ImportReference(typeof(object));
             var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
-                | TypeAttributes.BeforeFieldInit, baseRef);
+                                                             | TypeAttributes.BeforeFieldInit, baseRef);
             cla.AddConstructor(mod, 1);
             mod.Types.Add(cla);
         }
