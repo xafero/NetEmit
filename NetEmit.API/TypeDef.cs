@@ -2,11 +2,11 @@
 
 namespace NetEmit.API
 {
-    public abstract class TypeDef : IComparable<TypeDef>, IComparable
+    public class TypeDef : IComparable<TypeDef>, IComparable
     {
         public string Name { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 8);
 
-        public abstract TypeKind Kind { get; }
+        public TypeKind Kind { get; set; }
 
         public int CompareTo(TypeDef other) => string.CompareOrdinal(Name, other.Name);
 

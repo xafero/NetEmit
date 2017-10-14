@@ -2,6 +2,9 @@
 {
     public class DelegateDef : TypeDef
     {
-        public override TypeKind Kind => TypeKind.Delegate;
+        public DelegateDef()
+        {
+            Kind = TypeKind.Delegate;
+        }
     }
 }

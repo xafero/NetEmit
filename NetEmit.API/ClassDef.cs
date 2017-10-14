@@ -2,6 +2,9 @@
 {
     public class ClassDef : TypeDef
     {
-        public override TypeKind Kind => TypeKind.Class;
+        public ClassDef()
+        {
+            Kind = TypeKind.Class;
+        }
     }
 }

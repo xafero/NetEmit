@@ -2,6 +2,9 @@
 {
     public class StructDef : TypeDef
     {
-        public override TypeKind Kind => TypeKind.Struct;
+        public StructDef()
+        {
+            Kind = TypeKind.Struct;
+        }
     }
 }
