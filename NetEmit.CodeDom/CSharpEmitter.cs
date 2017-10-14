@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.CSharp;
 using NetEmit.API;
 using Noaster.Dist;
@@ -32,11 +33,21 @@ namespace NetEmit.CodeDom
             };
             var sources = new List<string> {GenerateMeta(ass)};
             sources.AddRange(GenerateCode(ass));
+            WriteAllCode(file, sources);
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
             var dyn = results.CompiledAssembly;
             if (dyn == null)
                 throw new InvalidOperationException(ToText(results));
             return Path.GetFullPath(results.PathToAssembly ?? dyn.Location ?? dyn.CodeBase);
+        }
+
+        private static void WriteAllCode(string file, IEnumerable<string> sources)
+        {
+            var code = string.Join(Environment.NewLine, sources);
+            var csDir = Path.GetDirectoryName(file) ?? string.Empty;
+            var csFile = $"{Path.GetFileNameWithoutExtension(file) ?? "gen"}.cs";
+            var csPath = Path.Combine(csDir, csFile);
+            File.WriteAllText(csPath, code, Encoding.UTF8);
         }
 
         private static string GenerateMeta(IAssembly ass)
