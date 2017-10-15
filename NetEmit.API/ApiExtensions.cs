@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace NetEmit.API
 {
@@ -13,6 +13,12 @@ namespace NetEmit.API
         public static string GetFileName(this AssemblyDef ass) => ass.FileName ?? $"{ass.Name}.{ass.GetExt()}";
 
         public static string GetVersion(this AssemblyDef ass) => ass.Version ?? $"{new Version(1, 0, 0, 0)}";
+
+        public static CompilationRelaxations GetRelaxations(this AssemblyDef ass)
+            => ass.Manifest.StringInterning ? 0 : CompilationRelaxations.NoStringInterning;
+
+        public static bool ShouldWrapNonExceptions(this AssemblyDef ass)
+            => !ass.Manifest.DontWrapNonExceptions;
 
         public static Tuple<string, object> Sets(this string key, object value) => Tuple.Create(key, value);
 

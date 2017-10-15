@@ -40,6 +40,7 @@
     <Compile Include="IAssemblyEmitter.cs" />
     <Compile Include="IHasNamespaces.cs" />
     <Compile Include="InterfaceDef.cs" />
+    <Compile Include="ManifestDef.cs" />
     <Compile Include="NamespaceDef.cs" />
     <Compile Include="ClassDef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

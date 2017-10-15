@@ -30,7 +30,7 @@ namespace NetEmit.Cecil
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
-                    var wparms = new WriterParameters {WriteSymbols = false};
+                    var wparms = new WriterParameters { WriteSymbols = false };
                     dyn.Write(file, wparms);
                 }
             }
@@ -39,9 +39,9 @@ namespace NetEmit.Cecil
 
         private static void Emit(AssemblyDef ass, AssemblyDefinition bld)
         {
-            bld.AddAttribute<CompilationRelaxationsAttribute>(8);
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
-                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(true)
+                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
             );
             var mod = bld.MainModule;
             foreach (var nsp in ass.GetNamespaces())
@@ -101,17 +101,17 @@ namespace NetEmit.Cecil
                 Tuple.Create("method", typeof(IntPtr)));
             const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
                                            MethodAttributes.NewSlot | MethodAttributes.Virtual;
-            var invMeth = new MethodDefinition("Invoke", mattr, voidRef) {IsRuntime = true};
+            var invMeth = new MethodDefinition("Invoke", mattr, voidRef) { IsRuntime = true };
             dlg.Methods.Add(invMeth);
             var arr = mod.ImportReference(typeof(IAsyncResult));
-            var begMeth = new MethodDefinition("BeginInvoke", mattr, arr) {IsRuntime = true};
-            var parm = new ParameterDefinition(mod.ImportReference(typeof(AsyncCallback))) {Name = "callback"};
+            var begMeth = new MethodDefinition("BeginInvoke", mattr, arr) { IsRuntime = true };
+            var parm = new ParameterDefinition(mod.ImportReference(typeof(AsyncCallback))) { Name = "callback" };
             begMeth.Parameters.Add(parm);
-            parm = new ParameterDefinition(mod.ImportReference(typeof(object))) {Name = "object"};
+            parm = new ParameterDefinition(mod.ImportReference(typeof(object))) { Name = "object" };
             begMeth.Parameters.Add(parm);
             dlg.Methods.Add(begMeth);
-            var endMeth = new MethodDefinition("EndInvoke", mattr, voidRef) {IsRuntime = true};
-            parm = new ParameterDefinition(mod.ImportReference(typeof(IAsyncResult))) {Name = "result"};
+            var endMeth = new MethodDefinition("EndInvoke", mattr, voidRef) { IsRuntime = true };
+            parm = new ParameterDefinition(mod.ImportReference(typeof(IAsyncResult))) { Name = "result" };
             endMeth.Parameters.Add(parm);
             dlg.Methods.Add(endMeth);
             mod.Types.Add(dlg);

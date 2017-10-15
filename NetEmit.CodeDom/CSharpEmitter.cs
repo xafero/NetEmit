@@ -31,11 +31,11 @@ namespace NetEmit.CodeDom
                 IncludeDebugInformation = false,
                 OutputAssembly = file
             };
-            var sources = new List<string> {GenerateMeta(ass)};
+            var sources = new List<string> { GenerateMeta(ass) };
             sources.AddRange(GenerateCode(ass));
             WriteAllCode(file, sources);
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
-            var dyn = results.CompiledAssembly;
+            var dyn = results.TryGetCompiledAssembly();
             if (dyn == null)
                 throw new InvalidOperationException(ToText(results));
             return Path.GetFullPath(results.PathToAssembly ?? dyn.Location ?? dyn.CodeBase);
@@ -57,7 +57,9 @@ namespace NetEmit.CodeDom
             code.WriteLine("using System.Reflection;");
             code.WriteLine("using System.Runtime.CompilerServices;");
             code.WriteLine();
-            code.WriteLine($@"[assembly: CompilationRelaxations(8)]");
+            code.WriteLine($@"[assembly: CompilationRelaxations({(int)ass.GetRelaxations()})]");
+            code.WriteLine("[assembly: RuntimeCompatibilityAttribute(WrapNonExceptionThrows = "
+                + $"{ass.ShouldWrapNonExceptions().ToCode()})]");
             code.WriteLine($@"[assembly: AssemblyVersion(""{ass.GetVersion()}"")]");
             return code.ToString();
         }

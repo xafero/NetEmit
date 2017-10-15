@@ -14,5 +14,7 @@ namespace NetEmit.API
         public bool IsExe { get; set; }
 
         public ICollection<NamespaceDef> Namespaces { get; } = new SortedSet<NamespaceDef>();
+
+        public ManifestDef Manifest { get; set; } = new ManifestDef();
     }
 }
