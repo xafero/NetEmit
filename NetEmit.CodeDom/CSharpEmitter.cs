@@ -64,7 +64,7 @@ namespace NetEmit.CodeDom
 
         private static IEnumerable<string> GenerateCode(AssemblyDef ass)
         {
-            foreach (var nsp in ass.Namespaces)
+            foreach (var nsp in ass.GetNamespaces())
             {
                 var n = N.Create<NA.INamespace>(nsp.Name);
                 foreach (var type in nsp.Types)

@@ -44,7 +44,7 @@ namespace NetEmit.Cecil
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(true)
             );
             var mod = bld.MainModule;
-            foreach (var nsp in ass.Namespaces)
+            foreach (var nsp in ass.GetNamespaces())
                 Emit(nsp, mod);
         }
 

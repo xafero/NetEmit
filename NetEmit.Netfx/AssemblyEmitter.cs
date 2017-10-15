@@ -39,7 +39,7 @@ namespace NetEmit.Netfx
             );
             var path = Path.GetFileName(ass.GetFileName());
             var mod = bld.DefineDynamicModule(path ?? ass.GetFileName());
-            foreach (var nsp in ass.Namespaces)
+            foreach (var nsp in ass.GetNamespaces())
                 Emit(nsp, mod);
         }
 

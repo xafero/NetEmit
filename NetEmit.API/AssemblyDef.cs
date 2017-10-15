@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NetEmit.API
 {
-    public class AssemblyDef
+    public class AssemblyDef : IHasNamespaces
     {
         public string Name { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 8);
 
