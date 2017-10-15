@@ -27,7 +27,7 @@ namespace NetEmit.CodeDom
             var parms = new CompilerParameters
             {
                 CompilerOptions = $"/target:{ass.GetKind()} /optimize",
-                GenerateExecutable = ass.IsExe,
+                GenerateExecutable = ass.IsExe(),
                 IncludeDebugInformation = false,
                 OutputAssembly = file
             };

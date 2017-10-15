@@ -4,6 +4,10 @@ namespace NetEmit.API
 {
     public class ManifestDef
     {
+        public string Architecture { get; set; }
+
+        public string Header { get; set; }
+
         public bool StringInterning { get; set; }
 
         public bool DontWrapNonExceptions { get; set; }
@@ -29,5 +33,7 @@ namespace NetEmit.API
         public Guid? Guid { get; set; }
 
         public string Framework { get; set; }
+
+        public string EntryPoint { get; set; }
     }
 }

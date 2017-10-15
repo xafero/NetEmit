@@ -29,10 +29,13 @@ namespace NetEmit.Cecil
                 resolver.AddSearchDirectory(dir);
                 var parms = new ModuleParameters
                 {
-                    Kind = ass.IsExe ? ModuleKind.Console : ModuleKind.Dll,
+                    Kind = ass.IsExe() ? ModuleKind.Console : ModuleKind.Dll,
                     Runtime = TargetRuntime.Net_4_0,
                     AssemblyResolver = resolver
                 };
+                TargetArchitecture arch;
+                if (Enum.TryParse(ass.GetArchitecture(), true, out arch))
+                    parms.Architecture = arch;
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
@@ -63,8 +66,13 @@ namespace NetEmit.Cecil
                 nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
             );
             var mod = bld.MainModule;
+            ModuleAttributes modAttrs;
+            if (Enum.TryParse(ass.GetCorFlags(), true, out modAttrs))
+                mod.Attributes = modAttrs;
             foreach (var nsp in ass.GetNamespaces())
                 Emit(nsp, mod);
+            if (ass.IsExe())
+                mod.EntryPoint = null; // TODO: Find method after all!
         }
 
         private static void Emit(NamespaceDef nsp, ModuleDefinition mod)

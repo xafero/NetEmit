@@ -6,13 +6,20 @@ namespace NetEmit.API
 {
     public static class ApiExtensions
     {
-        public static string GetExt(this AssemblyDef ass) => ass.IsExe ? "exe" : "dll";
+        public static bool IsExe(this AssemblyDef ass) => ass.IsExe | ass.Manifest.EntryPoint != null;
 
-        public static string GetKind(this AssemblyDef ass) => ass.IsExe ? "exe" : "library";
+        public static string GetExt(this AssemblyDef ass) => ass.IsExe() ? "exe" : "dll";
+
+        public static string GetKind(this AssemblyDef ass) => ass.IsExe() ? "exe" : "library";
 
         public static string GetFileName(this AssemblyDef ass) => ass.FileName ?? $"{ass.Name}.{ass.GetExt()}";
 
         public static string GetVersion(this AssemblyDef ass) => ass.Version ?? $"{new Version(1, 0, 0, 0)}";
+
+        public static string GetArchitecture(this AssemblyDef ass) => ass.Manifest.Architecture ?? "i386";
+
+        public static string GetCorFlags(this AssemblyDef ass) => ass.Manifest.Header ??
+            "ILOnly" + (ass.IsExe() ? " , Preferred32Bit" : string.Empty);
 
         public static string GetFrameworkVersion(this AssemblyDef ass)
             => ass.Manifest.Framework ?? $"{new Version(4, 5)}";
