@@ -1,4 +1,6 @@
-﻿namespace NetEmit.API
+﻿using System;
+
+namespace NetEmit.API
 {
     public class ManifestDef
     {
@@ -11,5 +13,21 @@
         public string Config { get; set; }
 
         public string Copyright { get; set; }
+
+        public string Description { get; set; }
+
+        public string FileVersion { get; set; }
+
+        public string Product { get; set; }
+
+        public string Title { get; set; }
+
+        public string Trademark { get; set; }
+
+        public bool ComVisible { get; set; }
+
+        public Guid? Guid { get; set; }
+
+        public string Framework { get; set; }
     }
 }

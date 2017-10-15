@@ -2,6 +2,8 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Mono.Cecil;
 using NetEmit.API;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
@@ -46,9 +48,19 @@ namespace NetEmit.Cecil
             bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
             bld.AddAttribute<AssemblyConfigurationAttribute>(ass.GetConfig());
             bld.AddAttribute<AssemblyCopyrightAttribute>(ass.GetCopyright());
+            bld.AddAttribute<AssemblyDescriptionAttribute>(ass.GetDesc());
+            bld.AddAttribute<AssemblyFileVersionAttribute>(ass.GetFileVersion());
+            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
+            bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
+            bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
             bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
+            );
+            bld.AddAttribute<ComVisibleAttribute>(ass.Manifest.ComVisible);
+            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
+            bld.AddAttribute<TargetFrameworkAttribute>(ass.GetFrameworkLabel(),
+                nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
             );
             var mod = bld.MainModule;
             foreach (var nsp in ass.GetNamespaces())
