@@ -3,6 +3,10 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using Microsoft.CSharp;
 using NetEmit.API;
@@ -31,7 +35,7 @@ namespace NetEmit.CodeDom
                 IncludeDebugInformation = false,
                 OutputAssembly = file
             };
-            var sources = new List<string> { GenerateMeta(ass) };
+            var sources = new List<string> {GenerateMeta(ass)};
             sources.AddRange(GenerateCode(ass));
             WriteAllCode(file, sources);
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
@@ -52,16 +56,32 @@ namespace NetEmit.CodeDom
 
         private static string GenerateMeta(AssemblyDef ass)
         {
-            var code = new StringWriter();
-            code.WriteLine("using System;");
-            code.WriteLine("using System.Reflection;");
-            code.WriteLine("using System.Runtime.CompilerServices;");
-            code.WriteLine();
-            code.WriteLine($@"[assembly: CompilationRelaxations({(int)ass.GetRelaxations()})]");
-            code.WriteLine("[assembly: RuntimeCompatibilityAttribute(WrapNonExceptionThrows = "
-                + $"{ass.ShouldWrapNonExceptions().ToCode()})]");
-            code.WriteLine($@"[assembly: AssemblyVersion(""{ass.GetVersion()}"")]");
-            return code.ToString();
+            var bld = new StringWriter();
+            bld.WriteLine("using System;");
+            bld.WriteLine("using System.Reflection;");
+            bld.WriteLine("using System.Runtime.CompilerServices;");
+            bld.WriteLine("using System.Runtime.InteropServices;");
+            bld.WriteLine("using System.Runtime.Versioning;");
+            bld.WriteLine();
+            bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
+            bld.AddAttribute<AssemblyConfigurationAttribute>(ass.GetConfig());
+            bld.AddAttribute<AssemblyCopyrightAttribute>(ass.GetCopyright());
+            bld.AddAttribute<AssemblyDescriptionAttribute>(ass.GetDesc());
+            bld.AddAttribute<AssemblyFileVersionAttribute>(ass.GetFileVersion());
+            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
+            bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
+            bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int) ass.GetRelaxations());
+            bld.AddAttribute<RuntimeCompatibilityAttribute>(
+                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
+            );
+            bld.AddAttribute<AssemblyVersionAttribute>(ass.GetVersion());
+            bld.AddAttribute<ComVisibleAttribute>(ass.Manifest.ComVisible);
+            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
+            bld.AddAttribute<TargetFrameworkAttribute>(ass.GetFrameworkLabel(),
+                nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
+            );
+            return bld.ToString();
         }
 
         private static IEnumerable<string> GenerateCode(AssemblyDef ass)
