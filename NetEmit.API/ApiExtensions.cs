@@ -14,6 +14,13 @@ namespace NetEmit.API
 
         public static string GetVersion(this AssemblyDef ass) => ass.Version ?? $"{new Version(1, 0, 0, 0)}";
 
+        public static string GetCompany(this AssemblyDef ass) => ass.Manifest.Company ?? string.Empty;
+
+        public static string GetConfig(this AssemblyDef ass) => ass.Manifest.Config ?? string.Empty;
+
+        public static string GetCopyright(this AssemblyDef ass)
+            => ass.Manifest.Copyright ?? $"Copyright © {ass.GetCompany()} {DateTime.Today.Year}";
+
         public static CompilationRelaxations GetRelaxations(this AssemblyDef ass)
             => ass.Manifest.StringInterning ? 0 : CompilationRelaxations.NoStringInterning;
 

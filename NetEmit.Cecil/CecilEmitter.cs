@@ -1,8 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Mono.Cecil;
 using NetEmit.API;
+using FieldAttributes = Mono.Cecil.FieldAttributes;
+using MethodAttributes = Mono.Cecil.MethodAttributes;
+using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace NetEmit.Cecil
 {
@@ -39,6 +43,9 @@ namespace NetEmit.Cecil
 
         private static void Emit(AssemblyDef ass, AssemblyDefinition bld)
         {
+            bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
+            bld.AddAttribute<AssemblyConfigurationAttribute>(ass.GetConfig());
+            bld.AddAttribute<AssemblyCopyrightAttribute>(ass.GetCopyright());
             bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
