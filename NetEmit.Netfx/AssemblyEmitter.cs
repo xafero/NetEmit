@@ -3,6 +3,8 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using NetEmit.API;
 
 namespace NetEmit.Netfx
@@ -33,14 +35,29 @@ namespace NetEmit.Netfx
 
         private static void Emit(AssemblyDef ass, AssemblyBuilder bld)
         {
-            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
+            bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
+            bld.AddAttribute<AssemblyConfigurationAttribute>(ass.GetConfig());
+            bld.AddAttribute<AssemblyCopyrightAttribute>(ass.GetCopyright());
+            bld.AddAttribute<AssemblyDescriptionAttribute>(ass.GetDesc());
+            bld.AddAttribute<AssemblyFileVersionAttribute>(ass.GetFileVersion());
+            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
+            bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
+            bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int) ass.GetRelaxations());
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
+            );
+            bld.AddAttribute<ComVisibleAttribute>(ass.Manifest.ComVisible);
+            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
+            bld.AddAttribute<TargetFrameworkAttribute>(ass.GetFrameworkLabel(),
+                nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
             );
             var path = Path.GetFileName(ass.GetFileName());
             var mod = bld.DefineDynamicModule(path ?? ass.GetFileName());
             foreach (var nsp in ass.GetNamespaces())
                 Emit(nsp, mod);
+            if (ass.IsExe())
+                mod.SetUserEntryPoint(null); // TODO: Find method after all!
         }
 
         private static void Emit(NamespaceDef nsp, ModuleBuilder mod)

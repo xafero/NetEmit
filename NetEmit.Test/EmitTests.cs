@@ -18,11 +18,14 @@ namespace NetEmit.Test
     public class EmitTests
     {
         private static readonly ILHelper Helper = HelperFactory.CreateIlHelper();
+        
+        private static readonly Guid StaticGuid = Guid.NewGuid();
 
         private static AssemblyDef BuildTestModel()
             => new AssemblyDef
             {
                 Name = "TestMod",
+                Manifest = new ManifestDef {Guid = StaticGuid},
                 Namespaces =
                 {
                     new NamespaceDef
