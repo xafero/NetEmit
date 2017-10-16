@@ -1,9 +1,12 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using NetEmit.API;
+using NetEmit.Cecil;
+using NetEmit.CodeDom;
+using NetEmit.Netfx;
 using NUnit.Framework;
 
 using static NUnit.Framework.TestContext;
+using static NetEmit.Test.Testing;
 
 namespace NetEmit.Test
 {
@@ -62,9 +65,12 @@ namespace NetEmit.Test
         [TestCase("Wpf")]
         public void ShouldEmitSimilar(string suffix)
         {
-            var noOpModel = BuildTestModel(suffix);
             var noOpEmitter = new NoOpEmitter(Path.Combine(ResDir, $"{suffix}Test.exe"));
-            Console.WriteLine(noOpEmitter);
+            var gens = new IAssemblyEmitter[]
+            {
+                noOpEmitter, new CecilEmitter(), new AssemblyEmitter() /*, new CSharpEmitter()*/
+            };
+            CompareIlOutput(gens, v => ShouldEmit(BuildTestModel(suffix), v, "mmp"));
         }
 
         #region No-OP

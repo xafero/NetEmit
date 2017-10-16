@@ -57,7 +57,7 @@ namespace NetEmit.Netfx
             foreach (var nsp in ass.GetNamespaces())
                 Emit(nsp, mod);
             if (ass.IsExe())
-                mod.SetUserEntryPoint(null); // TODO: Find method after all!
+                ;  //mod.SetUserEntryPoint(null); // TODO: Find method after all!
         }
 
         private static void Emit(NamespaceDef nsp, ModuleBuilder mod)
