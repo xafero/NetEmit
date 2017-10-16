@@ -47,6 +47,7 @@
     <Compile Include="ILHelper.cs" />
     <Compile Include="MinimalTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Testing.cs" />
     <Compile Include="UnixIlHelper.cs" />
     <Compile Include="WindowsILHelper.cs" />
   </ItemGroup>

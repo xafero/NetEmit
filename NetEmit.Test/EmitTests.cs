@@ -3,9 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using DiffPlex;
-using DiffPlex.DiffBuilder;
-using DiffPlex.DiffBuilder.Model;
 using NetEmit.API;
 using NetEmit.Cecil;
 using NetEmit.CodeDom;
@@ -17,15 +14,13 @@ namespace NetEmit.Test
     [TestFixture]
     public class EmitTests
     {
-        private static readonly ILHelper Helper = HelperFactory.CreateIlHelper();
-        
         private static readonly Guid StaticGuid = Guid.NewGuid();
 
         private static AssemblyDef BuildTestModel()
             => new AssemblyDef
             {
                 Name = "TestMod",
-                Manifest = new ManifestDef {Guid = StaticGuid},
+                Manifest = new ManifestDef { Guid = StaticGuid },
                 Namespaces =
                 {
                     new NamespaceDef
@@ -55,10 +50,10 @@ namespace NetEmit.Test
             using (var bld = emitter)
                 file = bld.Emit(ass);
             var ilFile = Path.Combine(dir, $"{emitter.GetType().Name}_{ass.Name}.txt");
-            var dasm = Helper.GetDasmCmd(file, ilFile);
+            var dasm = Testing.Helper.GetDasmCmd(file, ilFile);
             using (var proc = Process.Start(new ProcessStartInfo(dasm.Item1, dasm.Item2)))
                 proc?.WaitForExit();
-            Helper.Filter(ilFile);
+            Testing.Helper.Filter(ilFile);
             if (File.Exists(targetFile))
                 File.Delete(targetFile);
             File.Move(file, file = targetFile);
@@ -99,42 +94,11 @@ namespace NetEmit.Test
                     var ins = 0;
                     var del = 0;
                     var chg = 0;
-                    WriteDiff(first.Value, second.Value, diffFile, ref ins, ref del, ref chg);
+                    Testing.WriteDiff(first.Value, second.Value, diffFile, ref ins, ref del, ref chg);
                     Console.WriteLine($"{Path.GetFileName(diffFile)} ({ins}+, {del}-, {chg}~)");
                     Assert.IsTrue(File.Exists(diffFile));
                     Assert.AreEqual(0, new FileInfo(diffFile).Length);
                 }
-        }
-
-        private static void WriteDiff(string oldText, string newText, string file,
-            ref int inserts, ref int deletes, ref int changes)
-        {
-            using (var diffFile = File.CreateText(file))
-            {
-                var diffBuilder = new InlineDiffBuilder(new Differ());
-                var diff = diffBuilder.BuildDiffModel(oldText, newText);
-                foreach (var line in diff.Lines)
-                {
-                    switch (line.Type)
-                    {
-                        case ChangeType.Inserted:
-                            diffFile.Write("+ ");
-                            inserts++;
-                            break;
-                        case ChangeType.Deleted:
-                            diffFile.Write("- ");
-                            deletes++;
-                            break;
-                        case ChangeType.Unchanged:
-                            continue;
-                        default:
-                            diffFile.Write("  ");
-                            changes++;
-                            break;
-                    }
-                    diffFile.WriteLine(line.Text);
-                }
-            }
         }
     }
 }
