@@ -21,7 +21,7 @@ namespace NetEmit.Test
         {
             return new AssemblyDef
             {
-                Name = "FormsTest",
+                Name = $"{key}Test",
                 Version = "1.0.0.0",
                 Manifest = new ManifestDef
                 {
