@@ -25,7 +25,8 @@ namespace NetEmit.Test
             => new[]
                 {
                     "// MVID:", "// Image base:", ".imagebase 0x", ".maxstack  ",
-                    ".pack ", ".size ", "// Warnung: "
+                    ".pack ", ".size ", "// Warnung: ", "System.Diagnostics.DebuggableAttribute",
+                    "added automatically, do not uncomment ---"
                 }.All(l => !line.Contains(l));
     }
 }
