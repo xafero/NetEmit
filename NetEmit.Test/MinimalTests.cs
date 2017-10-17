@@ -1,10 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NetEmit.API;
 using NetEmit.Cecil;
-using NetEmit.CodeDom;
 using NetEmit.Netfx;
 using NUnit.Framework;
-
 using static NUnit.Framework.TestContext;
 using static NetEmit.Test.Testing;
 
@@ -19,14 +18,84 @@ namespace NetEmit.Test
 
         private static AssemblyDef BuildTestModel(string key)
         {
-            return new AssemblyDef
+            switch (key.ToLowerInvariant())
             {
-                Name = $"{key}Test",
-                Version = "1.0.0.0",
+                case "forms":
+                    return BuildFormsModel();
+                case "native":
+                    return BuildNativeModel();
+                case "service":
+                    return BuildServiceModel();
+                case "wcf":
+                    return BuildWcfModel();
+                case "wpf":
+                    return BuildWpfModel();
+                default:
+                    throw new InvalidOperationException(key);
+            }
+        }
+
+        private static AssemblyDef BuildWpfModel()
+            => new AssemblyDef
+            {
+                Name = "WpfTest",
                 Manifest = new ManifestDef
                 {
+                    Guid = new Guid("5A50630E-FF58-4496-B406-CE70FA92DD71"),
                     Framework = "4.6.2",
-                    EntryPoint = "FormsTest.Program.Main"
+                    EntryPoint = "WpfTest.Program.Main"
+                },
+                Namespaces = {new NamespaceDef {Name = "WpfTest", Types = {new ClassDef {Name = "Program"}}}}
+            };
+
+        private static AssemblyDef BuildWcfModel()
+            => new AssemblyDef
+            {
+                Name = "WcfTest",
+                Manifest = new ManifestDef
+                {
+                    Guid = new Guid("60390c85-05c6-49bf-9f4f-d02061ba9fbc"),
+                    Framework = "4.6.2",
+                    EntryPoint = "WcfTest.Program.Main",
+                },
+                Namespaces = {new NamespaceDef {Name = "WcfTest", Types = {new ClassDef {Name = "Program"}}}}
+            };
+
+        private static AssemblyDef BuildServiceModel()
+            => new AssemblyDef
+            {
+                Name = "ServiceTest",
+                Manifest = new ManifestDef
+                {
+                    Guid = new Guid("f98c810c-efd5-4714-9683-1d57539ebb72"),
+                    Framework = "4.6.2",
+                    EntryPoint = "ServiceTest.Program.Main",
+                },
+                Namespaces = {new NamespaceDef {Name = "ServiceTest", Types = {new ClassDef {Name = "Program"}}}}
+            };
+
+        private static AssemblyDef BuildNativeModel()
+            => new AssemblyDef
+            {
+                Name = "NativeTest",
+                Manifest = new ManifestDef
+                {
+                    Guid = new Guid("cf933a46-8efe-4cf7-b42f-e186afcd4433"),
+                    Framework = "4.6.2",
+                    EntryPoint = "NativeTest.Program.Main",
+                },
+                Namespaces = {new NamespaceDef {Name = "NativeTest", Types = {new ClassDef {Name = "Program"}}}}
+            };
+
+        private static AssemblyDef BuildFormsModel()
+            => new AssemblyDef
+            {
+                Name = $"FormsTest",
+                Manifest = new ManifestDef
+                {
+                    Guid = new Guid("cb1fd752-5b6d-4721-b736-f7dfec2b1ec5"),
+                    Framework = "4.6.2",
+                    EntryPoint = "FormsTest.Program.Main",
                 },
                 Namespaces =
                 {
@@ -53,7 +122,6 @@ namespace NetEmit.Test
                     }
                 }
             };
-        }
 
         #endregion
 
