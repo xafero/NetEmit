@@ -91,6 +91,7 @@ namespace NetEmit.Test
             => new AssemblyDef
             {
                 Name = "FormsTest",
+                IsGui = true,
                 Manifest = new ManifestDef
                 {
                     Guid = new Guid("cb1fd752-5b6d-4721-b736-f7dfec2b1ec5"),

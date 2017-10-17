@@ -6,7 +6,10 @@ namespace NetEmit.API
 {
     public static class ApiExtensions
     {
-        public static bool IsExe(this AssemblyDef ass) => ass.IsExe | ass.Manifest.EntryPoint != null;
+        public static bool IsExe(this AssemblyDef ass) => ass.HasGui() | ass.IsExe
+                                                          | ass.Manifest.EntryPoint != null;
+
+        public static bool HasGui(this AssemblyDef ass) => ass.IsGui;
 
         public static string GetExt(this AssemblyDef ass) => ass.IsExe() ? "exe" : "dll";
 
@@ -19,7 +22,7 @@ namespace NetEmit.API
         public static string GetArchitecture(this AssemblyDef ass) => ass.Manifest.Architecture ?? "i386";
 
         public static string GetCorFlags(this AssemblyDef ass) => ass.Manifest.Header ??
-            "ILOnly" + (ass.IsExe() ? " , Preferred32Bit" : string.Empty);
+            "ILOnly" + (ass.IsExe() ? " , Required32Bit, Preferred32Bit" : string.Empty);
 
         public static string GetFrameworkVersion(this AssemblyDef ass)
             => ass.Manifest.Framework ?? $"{new Version(4, 5)}";

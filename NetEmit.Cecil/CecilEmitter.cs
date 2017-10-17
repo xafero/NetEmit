@@ -30,13 +30,11 @@ namespace NetEmit.Cecil
                 resolver.AddSearchDirectory(dir);
                 var parms = new ModuleParameters
                 {
-                    Kind = ass.IsExe() ? ModuleKind.Console : ModuleKind.Dll,
+                    Kind = GetKind(ass),
                     Runtime = TargetRuntime.Net_4_0,
                     AssemblyResolver = resolver
                 };
-                TargetArchitecture arch;
-                if (Enum.TryParse(ass.GetArchitecture(), true, out arch))
-                    parms.Architecture = arch;
+                ApplyArch(ass, parms);
                 using (var dyn = AssemblyDefinition.CreateAssembly(assName, moduleName, parms))
                 {
                     Emit(ass, dyn);
@@ -46,6 +44,23 @@ namespace NetEmit.Cecil
             }
             return file;
         }
+
+        private static void ApplyArch(AssemblyDef ass, ModuleParameters parms)
+        {
+            TargetArchitecture arch;
+            if (Enum.TryParse(ass.GetArchitecture(), true, out arch))
+                parms.Architecture = arch;
+        }
+
+        private static void ApplyAttributes(ModuleDefinition mod, AssemblyDef ass)
+        {
+            ModuleAttributes modAttrs;
+            if (Enum.TryParse(ass.GetCorFlags(), true, out modAttrs))
+                mod.Attributes = modAttrs;
+        }
+
+        private static ModuleKind GetKind(AssemblyDef ass)
+            => ass.IsExe() ? (ass.HasGui() ? ModuleKind.Windows : ModuleKind.Console) : ModuleKind.Dll;
 
         private static void EmitResources(ModuleDefinition mod, IEnumerable<ResourceDef> resources)
         {
@@ -80,9 +95,7 @@ namespace NetEmit.Cecil
             );
             var mod = bld.MainModule;
             EmitResources(mod, ass.Resources);
-            ModuleAttributes modAttrs;
-            if (Enum.TryParse(ass.GetCorFlags(), true, out modAttrs))
-                mod.Attributes = modAttrs;
+            ApplyAttributes(mod, ass);
             foreach (var nsp in ass.GetNamespaces())
                 Emit(nsp, mod);
             if (ass.IsExe())

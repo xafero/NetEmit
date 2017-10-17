@@ -13,6 +13,8 @@ namespace NetEmit.API
 
         public bool IsExe { get; set; }
 
+        public bool IsGui { get; set; }
+
         public ICollection<ResourceDef> Resources { get; } = new SortedSet<ResourceDef>();
 
         public ICollection<NamespaceDef> Namespaces { get; } = new SortedSet<NamespaceDef>();
