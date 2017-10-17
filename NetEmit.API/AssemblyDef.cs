@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NetEmit.API
 {
-    public class AssemblyDef : IHasNamespaces
+    public class AssemblyDef : IHasNamespaces, IHasResources
     {
         public string Name { get; set; } = Guid.NewGuid().ToString("N").Substring(0, 8);
 
@@ -12,6 +12,8 @@ namespace NetEmit.API
         public string FileName { get; set; }
 
         public bool IsExe { get; set; }
+
+        public ICollection<ResourceDef> Resources { get; } = new SortedSet<ResourceDef>();
 
         public ICollection<NamespaceDef> Namespaces { get; } = new SortedSet<NamespaceDef>();
 

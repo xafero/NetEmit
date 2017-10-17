@@ -45,7 +45,7 @@ namespace NetEmit.Test
                     Framework = "4.6.2",
                     EntryPoint = "WpfTest.Program.Main"
                 },
-                Namespaces = {new NamespaceDef {Name = "WpfTest", Types = {new ClassDef {Name = "Program"}}}}
+                Namespaces = { new NamespaceDef { Name = "WpfTest", Types = { new ClassDef { Name = "Program" } } } }
             };
 
         private static AssemblyDef BuildWcfModel()
@@ -58,7 +58,7 @@ namespace NetEmit.Test
                     Framework = "4.6.2",
                     EntryPoint = "WcfTest.Program.Main",
                 },
-                Namespaces = {new NamespaceDef {Name = "WcfTest", Types = {new ClassDef {Name = "Program"}}}}
+                Namespaces = { new NamespaceDef { Name = "WcfTest", Types = { new ClassDef { Name = "Program" } } } }
             };
 
         private static AssemblyDef BuildServiceModel()
@@ -71,7 +71,7 @@ namespace NetEmit.Test
                     Framework = "4.6.2",
                     EntryPoint = "ServiceTest.Program.Main",
                 },
-                Namespaces = {new NamespaceDef {Name = "ServiceTest", Types = {new ClassDef {Name = "Program"}}}}
+                Namespaces = { new NamespaceDef { Name = "ServiceTest", Types = { new ClassDef { Name = "Program" } } } }
             };
 
         private static AssemblyDef BuildNativeModel()
@@ -84,18 +84,23 @@ namespace NetEmit.Test
                     Framework = "4.6.2",
                     EntryPoint = "NativeTest.Program.Main",
                 },
-                Namespaces = {new NamespaceDef {Name = "NativeTest", Types = {new ClassDef {Name = "Program"}}}}
+                Namespaces = { new NamespaceDef { Name = "NativeTest", Types = { new ClassDef { Name = "Program" } } } }
             };
 
         private static AssemblyDef BuildFormsModel()
             => new AssemblyDef
             {
-                Name = $"FormsTest",
+                Name = "FormsTest",
                 Manifest = new ManifestDef
                 {
                     Guid = new Guid("cb1fd752-5b6d-4721-b736-f7dfec2b1ec5"),
                     Framework = "4.6.2",
-                    EntryPoint = "FormsTest.Program.Main",
+                    EntryPoint = "FormsTest.Program.Main"
+                },
+                Resources =
+                {
+                    new ResourceDef {Name = "FormsTest.Form1.resources", Length = 180},
+                    new ResourceDef {Name = "FormsTest.Properties.Resources.resources", Length = 180}
                 },
                 Namespaces =
                 {
@@ -127,10 +132,10 @@ namespace NetEmit.Test
 
         [Test]
         [TestCase("Forms")]
-        [TestCase("Native")]
+        /*[TestCase("Native")]
         [TestCase("Service")]
         [TestCase("Wcf")]
-        [TestCase("Wpf")]
+        [TestCase("Wpf")]*/
         public void ShouldEmitSimilar(string suffix)
         {
             var noOpEmitter = new NoOpEmitter(Path.Combine(ResDir, $"{suffix}Test.exe"));

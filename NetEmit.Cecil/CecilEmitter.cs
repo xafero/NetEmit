@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -46,6 +47,18 @@ namespace NetEmit.Cecil
             return file;
         }
 
+        private static void EmitResources(ModuleDefinition mod, IEnumerable<ResourceDef> resources)
+        {
+            foreach (var resource in resources)
+            {
+                var name = resource.Name;
+                const ManifestResourceAttributes attr = ManifestResourceAttributes.Public;
+                var data = new byte[resource.Length ?? 0];
+                var embRes = new EmbeddedResource(name, attr, data);
+                mod.Resources.Add(embRes);
+            }
+        }
+
         private static void Emit(AssemblyDef ass, AssemblyDefinition bld)
         {
             bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
@@ -66,6 +79,7 @@ namespace NetEmit.Cecil
                 nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
             );
             var mod = bld.MainModule;
+            EmitResources(mod, ass.Resources);
             ModuleAttributes modAttrs;
             if (Enum.TryParse(ass.GetCorFlags(), true, out modAttrs))
                 mod.Attributes = modAttrs;
