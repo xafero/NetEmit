@@ -34,6 +34,72 @@ namespace NetEmit.Test
                             new InterfaceDef {Name = "MyI"},
                             new ClassDef {Name = "MyC"}
                         }
+                    },
+                    new NamespaceDef
+                    {
+                        Name = "My.Service.Api",
+                        Types =
+                        {
+                            new InterfaceDef
+                            {
+                                Name = "IService",
+                                Members =
+                                {
+                                    new MethodDef {Name = "GetTime"},
+                                    new PropertyDef {Name = "Name"},
+                                    new EventDef {Name = "OnStartUp"},
+                                    new IndexerDef()
+                                }
+                            },
+                            new StructDef
+                            {
+                                Name = "Book",
+                                Members =
+                                {
+                                    new ConstructorDef(),
+                                    new ConstantDef(),
+                                    new FieldDef(),
+                                    new MethodDef {Name = "Buy"},
+                                    new PropertyDef {Name = "Title"},
+                                    new IndexerDef(),
+                                    new OperatorDef(),
+                                    new EventDef {Name = "Bought"}
+                                }
+                            },
+                            new EnumDef
+                            {
+                                Name = "Days",
+                                Members =
+                                {
+                                    new ConstantDef {Name = "Sat"},
+                                    new ConstantDef {Name = "Wed"},
+                                    new ConstantDef {Name = "Fri"}
+                                }
+                            },
+                            new DelegateDef
+                            {
+                                Name = "Delegat",
+                                Members =
+                                {
+                                    new MethodDef()
+                                }
+                            },
+                            new ClassDef
+                            {
+                                Name = "Test",
+                                Members =
+                                {
+                                    new ConstructorDef(),
+                                    new ConstantDef(),
+                                    new FieldDef(),
+                                    new MethodDef {Name = "Quit"},
+                                    new PropertyDef {Name = "Caption"},
+                                    new IndexerDef(),
+                                    new OperatorDef(),
+                                    new EventDef {Name = "Disposed"}
+                                }
+                            }
+                        }
                     }
                 }
             };
