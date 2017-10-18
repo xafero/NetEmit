@@ -180,11 +180,20 @@ namespace NetEmit.Cecil
 
         private static void EmitClass(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
         {
-            var baseRef = mod.ImportReference(typeof(object));
+            var baseRef = mod.ImportReference(GetBaseType<object>(typ));
             var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                              | TypeAttributes.BeforeFieldInit, baseRef);
             cla.AddConstructor(mod, 1);
             mod.Types.Add(cla);
+        }
+
+        private static Type GetBaseType<T>(TypeDef typ)
+        {
+            var baseType = typeof(T);
+            var baseName = (typ as IHasBase)?.Base;
+            if (!string.IsNullOrWhiteSpace(baseName))
+                baseType = Type.GetType(baseName, true, true);
+            return baseType;
         }
 
         public void Dispose()

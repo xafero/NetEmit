@@ -110,7 +110,10 @@ namespace NetEmit.Test
                         Name = "FormsTest",
                         Types =
                         {
-                            new ClassDef {Name = "Form1"},
+                            new ClassDef {
+                                Name = "Form1",
+                                Base = "System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                            },
                             new ClassDef {Name = "Program"}
                         },
                         Namespaces =

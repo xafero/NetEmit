@@ -38,6 +38,7 @@
     <Compile Include="DelegateDef.cs" />
     <Compile Include="EnumDef.cs" />
     <Compile Include="IAssemblyEmitter.cs" />
+    <Compile Include="IHasBase.cs" />
     <Compile Include="IHasNamespaces.cs" />
     <Compile Include="IHasResources.cs" />
     <Compile Include="InterfaceDef.cs" />
