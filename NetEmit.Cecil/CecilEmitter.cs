@@ -138,7 +138,7 @@ namespace NetEmit.Cecil
             var underRef = mod.ImportReference(typeof(int));
             enm.Fields.Add(new FieldDefinition("value__", FieldAttributes.Public | FieldAttributes.RTSpecialName
                                                           | FieldAttributes.SpecialName, underRef));
-            AddMembers(mod, enm, typ as IHasMembers);
+            AddMembers(mod, enm, typ);
             mod.Types.Add(enm);
         }
 
@@ -148,7 +148,7 @@ namespace NetEmit.Cecil
             var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                               | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
                                                               | TypeAttributes.BeforeFieldInit, valRef);
-            AddMembers(mod, stru, typ as IHasMembers);
+            AddMembers(mod, stru, typ);
             mod.Types.Add(stru);
         }
 
@@ -181,7 +181,7 @@ namespace NetEmit.Cecil
         {
             var intf = new TypeDefinition(nsp.Name, typ.Name,
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
-            AddMembers(mod, intf, typ as IHasMembers);
+            AddMembers(mod, intf, typ);
             mod.Types.Add(intf);
         }
 
@@ -191,7 +191,7 @@ namespace NetEmit.Cecil
             var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                              | TypeAttributes.BeforeFieldInit, baseRef);
             cla.AddConstructor(mod, 1);
-            AddMembers(mod, cla, typ as IHasMembers);
+            AddMembers(mod, cla, typ);
             mod.Types.Add(cla);
         }
 
@@ -205,6 +205,18 @@ namespace NetEmit.Cecil
                 AddProperty(mod, typ, member);
             foreach (var member in holder.Members.OfType<IndexerDef>())
                 AddIndexer(mod, typ, member);
+            foreach (var member in holder.Members.OfType<ConstantDef>())
+                AddConstant(mod, typ, member);
+        }
+
+        private static void AddConstant(ModuleDefinition mod, TypeDefinition typ, ConstantDef member)
+        {
+            var objRef = typ.IsEnum ? typ : mod.ImportReference(typeof(object));
+            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Literal
+                                         | FieldAttributes.Static;
+            var constInt = typ.Fields.Count - 1;
+            var fld = new FieldDefinition(member.Name, attr, objRef) { Constant = constInt };
+            typ.Fields.Add(fld);
         }
 
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
