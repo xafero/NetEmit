@@ -110,11 +110,24 @@ namespace NetEmit.Test
                         Name = "FormsTest",
                         Types =
                         {
-                            new ClassDef {
+                            new ClassDef
+                            {
                                 Name = "Form1",
-                                Base = "System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                                Base = "System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                                Members =
+                                {
+                                    new FieldDef {Name = "button1"},
+                                    new FieldDef {Name = "components"},
+                                    new MethodDef {Name = "button1_Click"},
+                                    new MethodDef {Name = "Dispose"},
+                                    new MethodDef {Name = "InitializeComponent"}
+                                }
                             },
-                            new ClassDef {Name = "Program"}
+                            new ClassDef
+                            {
+                                Name = "Program",
+                                Members = {new MethodDef {Name = "Main"}}
+                            }
                         },
                         Namespaces =
                         {
