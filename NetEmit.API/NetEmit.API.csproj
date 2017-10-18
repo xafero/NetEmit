@@ -35,9 +35,12 @@
   <ItemGroup>
     <Compile Include="ApiExtensions.cs" />
     <Compile Include="AssemblyDef.cs" />
+    <Compile Include="ConstantDef.cs" />
+    <Compile Include="ConstructorDef.cs" />
     <Compile Include="DelegateDef.cs" />
     <Compile Include="EnumDef.cs" />
     <Compile Include="EventDef.cs" />
+    <Compile Include="FieldDef.cs" />
     <Compile Include="IAssemblyEmitter.cs" />
     <Compile Include="IHasBase.cs" />
     <Compile Include="IHasMembers.cs" />
@@ -51,6 +54,7 @@
     <Compile Include="MethodDef.cs" />
     <Compile Include="NamespaceDef.cs" />
     <Compile Include="ClassDef.cs" />
+    <Compile Include="OperatorDef.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyDef.cs" />
     <Compile Include="ResourceDef.cs" />
