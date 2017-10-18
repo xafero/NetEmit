@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Mono.Cecil;
 using NetEmit.API;
+using EventAttributes = Mono.Cecil.EventAttributes;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
+using ParameterAttributes = Mono.Cecil.ParameterAttributes;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace NetEmit.Cecil
@@ -134,6 +137,7 @@ namespace NetEmit.Cecil
             var underRef = mod.ImportReference(typeof(int));
             enm.Fields.Add(new FieldDefinition("value__", FieldAttributes.Public | FieldAttributes.RTSpecialName
                                                           | FieldAttributes.SpecialName, underRef));
+            AddMembers(mod, enm, typ as IHasMembers);
             mod.Types.Add(enm);
         }
 
@@ -143,6 +147,7 @@ namespace NetEmit.Cecil
             var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                               | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
                                                               | TypeAttributes.BeforeFieldInit, valRef);
+            AddMembers(mod, stru, typ as IHasMembers);
             mod.Types.Add(stru);
         }
 
@@ -175,6 +180,7 @@ namespace NetEmit.Cecil
         {
             var intf = new TypeDefinition(nsp.Name, typ.Name,
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
+            AddMembers(mod, intf, typ as IHasMembers);
             mod.Types.Add(intf);
         }
 
@@ -184,7 +190,45 @@ namespace NetEmit.Cecil
             var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                              | TypeAttributes.BeforeFieldInit, baseRef);
             cla.AddConstructor(mod, 1);
+            AddMembers(mod, cla, typ as IHasMembers);
             mod.Types.Add(cla);
+        }
+
+        private static void AddMembers(ModuleDefinition mod, TypeDefinition typ, IHasMembers holder)
+        {
+            foreach (var member in holder.Members.OfType<MethodDef>())
+                AddMethod(mod, typ, member);
+            foreach (var member in holder.Members.OfType<EventDef>())
+                AddEvent(mod, typ, member);
+        }
+
+        private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
+        {
+            var voidRef = mod.ImportReference(typeof(void));
+            const MethodAttributes attr = MethodAttributes.Public;
+            var meth = new MethodDefinition(member.Name, attr, voidRef);
+            typ.Methods.Add(meth);
+        }
+
+        private static void AddEvent(ModuleDefinition mod, TypeDefinition typ, EventDef member)
+        {
+            var voidRef = mod.ImportReference(typeof(void));
+            var evth = mod.ImportReference(typeof(EventHandler));
+            const EventAttributes eattr = EventAttributes.None;
+            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
+                                           MethodAttributes.SpecialName | MethodAttributes.NewSlot |
+                                           MethodAttributes.Abstract | MethodAttributes.Virtual;
+            var valParm = new ParameterDefinition("value", ParameterAttributes.None, evth);
+            var evt = new EventDefinition(member.Name, eattr, evth)
+            {
+                AddMethod = new MethodDefinition($"add_{member.Name}", mattr, voidRef)
+                { Parameters = { valParm } },
+                RemoveMethod = new MethodDefinition($"remove_{member.Name}", mattr, voidRef)
+                { Parameters = { valParm } }
+            };
+            typ.Methods.Add(evt.AddMethod);
+            typ.Methods.Add(evt.RemoveMethod);
+            typ.Events.Add(evt);
         }
 
         private static Type GetBaseType<T>(TypeDef typ)
