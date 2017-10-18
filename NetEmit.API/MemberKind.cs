@@ -4,6 +4,8 @@
     {
         Method = 0,
 
-        Event = 1
+        Event = 1,
+
+        Property = 2
     }
 }

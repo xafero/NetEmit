@@ -12,6 +12,7 @@ using EventAttributes = Mono.Cecil.EventAttributes;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 using ParameterAttributes = Mono.Cecil.ParameterAttributes;
+using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
 
 namespace NetEmit.Cecil
@@ -200,6 +201,8 @@ namespace NetEmit.Cecil
                 AddMethod(mod, typ, member);
             foreach (var member in holder.Members.OfType<EventDef>())
                 AddEvent(mod, typ, member);
+            foreach (var member in holder.Members.OfType<PropertyDef>())
+                AddProperty(mod, typ, member);
         }
 
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
@@ -208,6 +211,25 @@ namespace NetEmit.Cecil
             const MethodAttributes attr = MethodAttributes.Public;
             var meth = new MethodDefinition(member.Name, attr, voidRef);
             typ.Methods.Add(meth);
+        }
+
+        private static void AddProperty(ModuleDefinition mod, TypeDefinition typ, PropertyDef member)
+        {
+            var voidRef = mod.ImportReference(typeof(void));
+            var prpRef = mod.ImportReference(typeof(string));
+            const PropertyAttributes pattr = PropertyAttributes.None;
+            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
+                                           MethodAttributes.SpecialName;
+            var valParm = new ParameterDefinition("value", ParameterAttributes.None, prpRef);
+            var prop = new PropertyDefinition(member.Name, pattr, prpRef)
+            {
+                GetMethod = new MethodDefinition($"get_{member.Name}", mattr, prpRef),
+                SetMethod = new MethodDefinition($"set_{member.Name}", mattr, voidRef)
+                { Parameters = { valParm } }
+            };
+            typ.Methods.Add(prop.GetMethod);
+            typ.Methods.Add(prop.SetMethod);
+            typ.Properties.Add(prop);
         }
 
         private static void AddEvent(ModuleDefinition mod, TypeDefinition typ, EventDef member)
