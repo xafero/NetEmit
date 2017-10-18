@@ -203,6 +203,8 @@ namespace NetEmit.Cecil
                 AddEvent(mod, typ, member);
             foreach (var member in holder.Members.OfType<PropertyDef>())
                 AddProperty(mod, typ, member);
+            foreach (var member in holder.Members.OfType<IndexerDef>())
+                AddIndexer(mod, typ, member);
         }
 
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
@@ -213,7 +215,7 @@ namespace NetEmit.Cecil
             typ.Methods.Add(meth);
         }
 
-        private static void AddProperty(ModuleDefinition mod, TypeDefinition typ, PropertyDef member)
+        private static PropertyDefinition CreateProperty(ModuleDefinition mod, string name)
         {
             var voidRef = mod.ImportReference(typeof(void));
             var prpRef = mod.ImportReference(typeof(string));
@@ -221,15 +223,35 @@ namespace NetEmit.Cecil
             const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
                                            MethodAttributes.SpecialName;
             var valParm = new ParameterDefinition("value", ParameterAttributes.None, prpRef);
-            var prop = new PropertyDefinition(member.Name, pattr, prpRef)
+            return new PropertyDefinition(name, pattr, prpRef)
             {
-                GetMethod = new MethodDefinition($"get_{member.Name}", mattr, prpRef),
-                SetMethod = new MethodDefinition($"set_{member.Name}", mattr, voidRef)
+                GetMethod = new MethodDefinition($"get_{name}", mattr, prpRef),
+                SetMethod = new MethodDefinition($"set_{name}", mattr, voidRef)
                 { Parameters = { valParm } }
             };
+        }
+
+        private static void AddProperty(ModuleDefinition mod, TypeDefinition typ, PropertyDef member)
+        {
+            var prop = CreateProperty(mod, member.Name);
             typ.Methods.Add(prop.GetMethod);
             typ.Methods.Add(prop.SetMethod);
             typ.Properties.Add(prop);
+        }
+
+        private static void AddIndexer(ModuleDefinition mod, TypeDefinition typ, IndexerDef member)
+        {
+            var intr = mod.ImportReference(typeof(int));
+            var indx = CreateProperty(mod, member.Name);
+            const ParameterAttributes pattr = ParameterAttributes.None;
+            var parm = new ParameterDefinition("index", pattr, intr);
+            var getter = indx.GetMethod;
+            getter.Parameters.Add(parm);
+            typ.Methods.Add(getter);
+            var setter = indx.SetMethod;
+            setter.Parameters.Insert(0, parm);
+            typ.Methods.Add(setter);
+            typ.Properties.Add(indx);
         }
 
         private static void AddEvent(ModuleDefinition mod, TypeDefinition typ, EventDef member)

@@ -6,6 +6,8 @@
 
         Event = 1,
 
-        Property = 2
+        Property = 2,
+
+        Indexer = 3
     }
 }

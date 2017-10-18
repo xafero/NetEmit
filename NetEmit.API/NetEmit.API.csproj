@@ -43,6 +43,7 @@
     <Compile Include="IHasMembers.cs" />
     <Compile Include="IHasNamespaces.cs" />
     <Compile Include="IHasResources.cs" />
+    <Compile Include="IndexerDef.cs" />
     <Compile Include="InterfaceDef.cs" />
     <Compile Include="ManifestDef.cs" />
     <Compile Include="MemberDef.cs" />
