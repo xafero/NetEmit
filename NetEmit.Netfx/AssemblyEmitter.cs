@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -43,7 +44,7 @@ namespace NetEmit.Netfx
             bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
             bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
             bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
-            bld.AddAttribute<CompilationRelaxationsAttribute>((int) ass.GetRelaxations());
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
             );
@@ -93,6 +94,7 @@ namespace NetEmit.Netfx
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.BeforeFieldInit;
             var cla = mod.DefineType(GetFqn(nsp, typ), attr);
             cla.AddConstructor();
+            AddMembers(mod, cla, typ);
             cla.CreateType();
         }
 
@@ -101,6 +103,7 @@ namespace NetEmit.Netfx
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.Interface
                                         | TypeAttributes.Abstract;
             var intf = mod.DefineType(GetFqn(nsp, typ), attr);
+            AddMembers(mod, intf, typ);
             intf.CreateType();
         }
 
@@ -137,6 +140,9 @@ namespace NetEmit.Netfx
             var under = typeof(int);
             var enm = mod.DefineEnum(GetFqn(nsp, typ), attr, under);
             enm.FixUnderlyingVisibility();
+            var index = 0;
+            foreach (var member in typ.Members.OfType<ConstantDef>())
+                enm.DefineLiteral(member.Name, index++);
             enm.CreateType();
         }
 
@@ -148,7 +154,106 @@ namespace NetEmit.Netfx
                                         | TypeAttributes.BeforeFieldInit;
             var under = typeof(ValueType);
             var stru = mod.DefineType(GetFqn(nsp, typ), attr, under);
+            AddMembers(mod, stru, typ);
             stru.CreateType();
+        }
+
+        private static void AddMembers(ModuleBuilder mod, TypeBuilder typ, IHasMembers holder)
+        {
+            foreach (var member in holder.Members.OfType<MethodDef>())
+                AddMethod(mod, typ, member);
+            foreach (var member in holder.Members.OfType<EventDef>())
+                AddEvent(mod, typ, member);
+            foreach (var member in holder.Members.OfType<PropertyDef>())
+                AddProperty(mod, typ, member);
+            foreach (var member in holder.Members.OfType<IndexerDef>())
+                AddIndexer(mod, typ, member);
+            foreach (var member in holder.Members.OfType<ConstantDef>())
+                AddConstant(mod, typ, member);
+        }
+
+        private static void AddConstant(ModuleBuilder mod, TypeBuilder typ, ConstantDef member)
+        {
+            var objRef = typ.IsEnum ? typ : typeof(object);
+            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Literal
+                                         | FieldAttributes.Static;
+            const int constInt = 1;
+            var fld = typ.DefineField(member.Name, objRef, attr);
+            if (typ.IsEnum)
+                fld.SetConstant(constInt);
+        }
+
+        private static void CreateProperty(TypeBuilder typ, string name,
+            params Tuple<string, Type>[] args)
+        {
+            var voidRef = typeof(void);
+            var prpRef = typeof(string);
+            var prmRefs = new Type[0];
+            const PropertyAttributes attr = PropertyAttributes.None;
+            var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
+                                           MethodAttributes.SpecialName;
+            if (typ.IsInterface)
+                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+            var prop = typ.DefineProperty(name, attr, prpRef, prmRefs);
+            var pargs = args.Select(a => a.Item2).ToArray();
+            var getter = typ.DefineMethod($"get_{name}", mattr, prpRef, pargs);
+            if (!typ.IsInterface)
+                getter.SetMethodBody(new byte[1], 0, new byte[0], null, null);
+            getter.ApplyParams(args);
+            var setPrms = pargs.Concat(new[] { prpRef }).ToArray();
+            var setter = typ.DefineMethod($"set_{name}", mattr, voidRef, setPrms);
+            setter.DefineParameter(setPrms.Length, ParameterAttributes.None, "value");
+            if (!typ.IsInterface)
+                setter.SetMethodBody(new byte[1], 0, new byte[0], null, null);
+            setter.ApplyParams(args);
+            prop.SetGetMethod(getter);
+            prop.SetSetMethod(setter);
+        }
+
+        private static void AddIndexer(ModuleBuilder mod, TypeBuilder typ, IndexerDef member)
+        {
+            var intr = typeof(int);
+            CreateProperty(typ, member.Name, Tuple.Create("index", intr));
+        }
+
+        private static void AddProperty(ModuleBuilder mod, TypeBuilder typ, PropertyDef member)
+        {
+            CreateProperty(typ, member.Name);
+        }
+
+        private static void AddEvent(ModuleBuilder mod, TypeBuilder typ, EventDef member)
+        {
+            var voidRef = typeof(void);
+            var evth = typeof(EventHandler);
+            const EventAttributes attr = EventAttributes.None;
+            var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
+                                           MethodAttributes.NewSlot | MethodAttributes.SpecialName |
+                                           MethodAttributes.Virtual;
+            if (typ.IsInterface)
+                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+            var evt = typ.DefineEvent(member.Name, attr, evth);
+            var adder = typ.DefineMethod($"add_{member.Name}", mattr, voidRef, new[] { evth });
+            adder.DefineParameter(1, ParameterAttributes.None, "value");
+            if (!typ.IsInterface)
+                adder.SetMethodBody(new byte[1], 0, new byte[0], null, null);
+            var remover = typ.DefineMethod($"remove_{member.Name}", mattr, voidRef, new[] { evth });
+            remover.DefineParameter(1, ParameterAttributes.None, "value");
+            if (!typ.IsInterface)
+                remover.SetMethodBody(new byte[1], 0, new byte[0], null, null);
+            evt.SetAddOnMethod(adder);
+            evt.SetRemoveOnMethod(remover);
+        }
+
+        private static void AddMethod(ModuleBuilder mod, TypeBuilder typ, MethodDef member)
+        {
+            var retType = typeof(void);
+            var prmTypes = new Type[0];
+            var attr = MethodAttributes.Public;
+            if (typ.IsInterface)
+                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+            var meth = typ.DefineMethod(member.Name, attr, retType, prmTypes);
+            if (!typ.IsInterface)
+                meth.SetMethodBody(new byte[1], 0, new byte[0], null, null);
         }
 
         public void Dispose()

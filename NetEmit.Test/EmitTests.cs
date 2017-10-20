@@ -20,7 +20,7 @@ namespace NetEmit.Test
             => new AssemblyDef
             {
                 Name = "TestMod",
-                Manifest = new ManifestDef { Guid = StaticGuid },
+                Manifest = new ManifestDef {Guid = StaticGuid},
                 Namespaces =
                 {
                     new NamespaceDef
@@ -57,8 +57,8 @@ namespace NetEmit.Test
                                 Members =
                                 {
                                     new ConstructorDef(),
-                                    new ConstantDef(),
-                                    new FieldDef(),
+                                    new ConstantDef {Name = "MaxNumber"},
+                                    new FieldDef {Name = "number"},
                                     new MethodDef {Name = "Buy"},
                                     new PropertyDef {Name = "Title"},
                                     new IndexerDef(),
@@ -90,8 +90,8 @@ namespace NetEmit.Test
                                 Members =
                                 {
                                     new ConstructorDef(),
-                                    new ConstantDef(),
-                                    new FieldDef(),
+                                    new ConstantDef {Name = "MaxLength"},
+                                    new FieldDef {Name = "Id"},
                                     new MethodDef {Name = "Quit"},
                                     new PropertyDef {Name = "Caption"},
                                     new IndexerDef(),

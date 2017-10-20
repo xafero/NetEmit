@@ -37,5 +37,12 @@ namespace NetEmit.Netfx
                                           | FieldAttributes.RTSpecialName;
             privAttr.SetValue(fld, attrs);
         }
+
+        public static void ApplyParams(this MethodBuilder meth, Tuple<string, Type>[] args)
+        {
+            var index = 0;
+            foreach (var arg in args)
+                meth.DefineParameter(++index, ParameterAttributes.None, arg.Item1);
+        }
     }
 }
