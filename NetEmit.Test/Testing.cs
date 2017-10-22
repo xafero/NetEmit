@@ -17,7 +17,8 @@ namespace NetEmit.Test
 
         internal static string ShouldEmit(AssemblyDef ass, IAssemblyEmitter emitter, string prefix)
         {
-            var dir = Path.GetFullPath(prefix);
+            var root = TestContext.CurrentContext.TestDirectory;
+            var dir = Path.Combine(root, prefix);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             ass.FileName = Path.Combine(dir, ass.GetFileName());
