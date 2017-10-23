@@ -148,7 +148,9 @@ namespace NetEmit.CodeDom
             if (holder == null || !(typ is NA.IInterface))
                 return;
             var indx = N.Create<NA.IIndexer>(member.Name);
+            indx.Type = typeof(string).FullName;
             var parm = N.Create<NA.IParameter>("index");
+            parm.Type = typeof(int).FullName;
             indx.Parameters.Add(parm);
             holder.Indexers.Add(indx);
         }
@@ -159,6 +161,7 @@ namespace NetEmit.CodeDom
             if (holder == null)
                 return;
             var prop = N.Create<NA.IProperty>(member.Name);
+            prop.Type = typeof(string).FullName;
             holder.Properties.Add(prop);
         }
 
@@ -190,22 +193,30 @@ namespace NetEmit.CodeDom
 
         private static void EmitInterface(NA.INamespace nsp, TypeDef typ)
         {
-            var i = N.Create<NA.IInterface>(typ.Name, nsp).With(NA.Visibility.Public);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var i = N.Create<NA.IInterface>(typ.Name, nsp).With(attr);
+            AddMembers(i, typ);
         }
 
         private static void EmitDelegate(NA.INamespace nsp, TypeDef typ)
         {
-            var d = N.Create<NA.IDelegate>(typ.Name, nsp).With(NA.Visibility.Public);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var d = N.Create<NA.IDelegate>(typ.Name, nsp).With(attr);
+            AddMembers(d, typ);
         }
 
         private static void EmitStruct(NA.INamespace nsp, TypeDef typ)
         {
-            var s = N.Create<NA.IStruct>(typ.Name, nsp).With(NA.Visibility.Public);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var s = N.Create<NA.IStruct>(typ.Name, nsp).With(attr);
+            AddMembers(s, typ);
         }
 
         private static void EmitEnum(NA.INamespace nsp, TypeDef typ)
         {
-            var e = N.Create<NA.IEnum>(typ.Name, nsp).With(NA.Visibility.Public);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var e = N.Create<NA.IEnum>(typ.Name, nsp).With(attr);
+            AddMembers(e, typ);
         }
 
         private static string ToText(CompilerResults results)

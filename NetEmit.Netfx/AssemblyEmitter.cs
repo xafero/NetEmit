@@ -191,10 +191,11 @@ namespace NetEmit.Netfx
             var prmRefs = new Type[0];
             const PropertyAttributes attr = PropertyAttributes.None;
             var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                                           MethodAttributes.SpecialName;
+                        MethodAttributes.SpecialName | MethodAttributes.NewSlot;
             if (typ.IsInterface)
                 mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
-            var prop = typ.DefineProperty(name, attr, prpRef, prmRefs);
+            const CallingConventions call = CallingConventions.HasThis;
+            var prop = typ.DefineProperty(name, attr, call, prpRef, prmRefs);
             var pargs = args.Select(a => a.Item2).ToArray();
             var getter = typ.DefineMethod($"get_{name}", mattr, prpRef, pargs);
             if (!typ.IsInterface)

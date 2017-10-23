@@ -227,13 +227,15 @@ namespace NetEmit.Cecil
             typ.Methods.Add(meth);
         }
 
-        private static PropertyDefinition CreateProperty(ModuleDefinition mod, string name)
+        private static PropertyDefinition CreateProperty(ModuleDefinition mod, string name, bool isAbstract)
         {
             var voidRef = mod.ImportReference(typeof(void));
             var prpRef = mod.ImportReference(typeof(string));
             const PropertyAttributes pattr = PropertyAttributes.None;
-            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                                           MethodAttributes.SpecialName;
+            var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
+                        MethodAttributes.SpecialName | MethodAttributes.NewSlot;
+            if (isAbstract)
+                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
             var valParm = new ParameterDefinition("value", ParameterAttributes.None, prpRef);
             return new PropertyDefinition(name, pattr, prpRef)
             {
@@ -245,7 +247,7 @@ namespace NetEmit.Cecil
 
         private static void AddProperty(ModuleDefinition mod, TypeDefinition typ, PropertyDef member)
         {
-            var prop = CreateProperty(mod, member.Name);
+            var prop = CreateProperty(mod, member.Name, typ.IsInterface | typ.IsAbstract);
             typ.Methods.Add(prop.GetMethod);
             typ.Methods.Add(prop.SetMethod);
             typ.Properties.Add(prop);
@@ -254,7 +256,7 @@ namespace NetEmit.Cecil
         private static void AddIndexer(ModuleDefinition mod, TypeDefinition typ, IndexerDef member)
         {
             var intr = mod.ImportReference(typeof(int));
-            var indx = CreateProperty(mod, member.Name);
+            var indx = CreateProperty(mod, member.Name, typ.IsInterface | typ.IsAbstract);
             const ParameterAttributes pattr = ParameterAttributes.None;
             var parm = new ParameterDefinition("index", pattr, intr);
             var getter = indx.GetMethod;
