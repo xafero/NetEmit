@@ -119,9 +119,35 @@ namespace NetEmit.CodeDom
             }
         }
 
+        private static void AddMembers(NA.IType typ, IHasMembers holder)
+        {
+            foreach (var member in holder.Members.OfType<MethodDef>())
+                AddMethod(typ, member);
+            foreach (var member in holder.Members.OfType<EventDef>())
+                AddEvent(typ, member);
+            foreach (var member in holder.Members.OfType<PropertyDef>())
+                AddProperty(typ, member);
+            foreach (var member in holder.Members.OfType<IndexerDef>())
+                AddIndexer(typ, member);
+            foreach (var member in holder.Members.OfType<ConstantDef>())
+                AddConstant(typ, member);
+        }
+
+        private static void AddEvent(NA.IType typ, EventDef member)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void AddMethod(NA.IType typ, MethodDef member)
+        {
+            throw new NotImplementedException();
+        }
+
         private static void EmitClass(NA.INamespace nsp, TypeDef typ)
         {
-            var c = N.Create<NA.IClass>(typ.Name, nsp).With(NA.Visibility.Public);
+            var attr = NA.Visibility.Public;
+            var cla = N.Create<NA.IClass>(typ.Name, nsp).With(attr);
+            AddMembers(cla, typ);
         }
 
         private static void EmitInterface(NA.INamespace nsp, TypeDef typ)
