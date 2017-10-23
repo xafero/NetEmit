@@ -35,7 +35,7 @@ namespace NetEmit.CodeDom
                 IncludeDebugInformation = false,
                 OutputAssembly = file
             };
-            var sources = new List<string> {GenerateMeta(ass)};
+            var sources = new List<string> { GenerateMeta(ass) };
             sources.AddRange(GenerateCode(ass));
             WriteAllCode(file, sources);
             var results = Provider.CompileAssemblyFromSource(parms, sources.ToArray());
@@ -71,7 +71,7 @@ namespace NetEmit.CodeDom
             bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
             bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
             bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
-            bld.AddAttribute<CompilationRelaxationsAttribute>((int) ass.GetRelaxations());
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<RuntimeCompatibilityAttribute>(
                 nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
             );
@@ -133,19 +133,57 @@ namespace NetEmit.CodeDom
                 AddConstant(typ, member);
         }
 
+        private static void AddConstant(NA.IType typ, ConstantDef member)
+        {
+            var holder = typ as NA.IHasFields;
+            if (holder == null)
+                return;
+            var fld = N.Create<NA.IField>(member.Name);
+            holder.Fields.Add(fld);
+        }
+
+        private static void AddIndexer(NA.IType typ, IndexerDef member)
+        {
+            var holder = typ as NA.IHasIndexers;
+            if (holder == null || !(typ is NA.IInterface))
+                return;
+            var indx = N.Create<NA.IIndexer>(member.Name);
+            var parm = N.Create<NA.IParameter>("index");
+            indx.Parameters.Add(parm);
+            holder.Indexers.Add(indx);
+        }
+
+        private static void AddProperty(NA.IType typ, PropertyDef member)
+        {
+            var holder = typ as NA.IHasProperties;
+            if (holder == null)
+                return;
+            var prop = N.Create<NA.IProperty>(member.Name);
+            holder.Properties.Add(prop);
+        }
+
         private static void AddEvent(NA.IType typ, EventDef member)
         {
-            throw new NotImplementedException();
+            var holder = typ as NA.IHasEvents;
+            if (holder == null)
+                return;
+            var evt = N.Create<NA.IEvent>(member.Name);
+            evt.Type = typeof(EventHandler).FullName;
+            holder.Events.Add(evt);
         }
 
         private static void AddMethod(NA.IType typ, MethodDef member)
         {
-            throw new NotImplementedException();
+            var holder = typ as NA.IHasMethods;
+            if (holder == null)
+                return;
+            var meth = N.Create<NA.IMethod>(member.Name);
+            holder.Methods.Add(meth);
         }
 
         private static void EmitClass(NA.INamespace nsp, TypeDef typ)
         {
-            var attr = NA.Visibility.Public;
+            const NA.Visibility attr = NA.Visibility.Public;
             var cla = N.Create<NA.IClass>(typ.Name, nsp).With(attr);
             AddMembers(cla, typ);
         }
