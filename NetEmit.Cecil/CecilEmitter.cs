@@ -222,7 +222,9 @@ namespace NetEmit.Cecil
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
         {
             var voidRef = mod.ImportReference(typeof(void));
-            const MethodAttributes attr = MethodAttributes.Public;
+            var attr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
+            if (typ.IsAbstract())
+                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
             var meth = new MethodDefinition(member.Name, attr, voidRef);
             typ.Methods.Add(meth);
         }

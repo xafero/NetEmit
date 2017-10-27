@@ -56,5 +56,7 @@ namespace NetEmit.Cecil
             ils.Append(ils.Create(OpCodes.Call, mod.ImportReference(objCstr)));
             ils.Append(ils.Create(OpCodes.Ret));
         }
+
+        public static bool IsAbstract(this TypeDefinition typ) => typ.IsInterface | typ.IsAbstract;
     }
 }

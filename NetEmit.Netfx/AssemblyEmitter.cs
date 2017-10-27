@@ -249,7 +249,7 @@ namespace NetEmit.Netfx
         {
             var retType = typeof(void);
             var prmTypes = new Type[0];
-            var attr = MethodAttributes.Public;
+            var attr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
             if (typ.IsInterface)
                 attr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
             var meth = typ.DefineMethod(member.Name, attr, retType, prmTypes);
