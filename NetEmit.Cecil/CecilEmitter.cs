@@ -138,8 +138,8 @@ namespace NetEmit.Cecil
             var underRef = mod.ImportReference(typeof(int));
             enm.Fields.Add(new FieldDefinition("value__", FieldAttributes.Public | FieldAttributes.RTSpecialName
                                                           | FieldAttributes.SpecialName, underRef));
-            AddMembers(mod, enm, typ);
             mod.Types.Add(enm);
+            AddMembers(mod, enm, typ);
         }
 
         private static void EmitStruct(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
@@ -148,8 +148,8 @@ namespace NetEmit.Cecil
             var stru = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                               | TypeAttributes.SequentialLayout | TypeAttributes.Sealed
                                                               | TypeAttributes.BeforeFieldInit, valRef);
-            AddMembers(mod, stru, typ);
             mod.Types.Add(stru);
+            AddMembers(mod, stru, typ);
         }
 
         private static void EmitDelegate(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
@@ -181,8 +181,8 @@ namespace NetEmit.Cecil
         {
             var intf = new TypeDefinition(nsp.Name, typ.Name,
                 TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
-            AddMembers(mod, intf, typ);
             mod.Types.Add(intf);
+            AddMembers(mod, intf, typ);
         }
 
         private static void EmitClass(NamespaceDef nsp, TypeDef typ, ModuleDefinition mod)
@@ -191,8 +191,8 @@ namespace NetEmit.Cecil
             var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                              | TypeAttributes.BeforeFieldInit, baseRef);
             cla.AddConstructor(mod, 1);
-            AddMembers(mod, cla, typ);
             mod.Types.Add(cla);
+            AddMembers(mod, cla, typ);
         }
 
         private static void AddMembers(ModuleDefinition mod, TypeDefinition typ, IHasMembers holder)
@@ -212,11 +212,12 @@ namespace NetEmit.Cecil
         private static void AddConstant(ModuleDefinition mod, TypeDefinition typ, ConstantDef member)
         {
             var objRef = typ.IsEnum ? typ : mod.ImportReference(typeof(object));
-            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Literal
-                                         | FieldAttributes.Static;
+            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Static
+                                         | FieldAttributes.Literal;
             var constInt = typ.Fields.Count - 1;
-            var fld = new FieldDefinition(member.Name, attr, objRef) { Constant = constInt };
+            var fld = new FieldDefinition(member.Name, attr, objRef);
             typ.Fields.Add(fld);
+            fld.Constant = constInt + 42;
         }
 
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)

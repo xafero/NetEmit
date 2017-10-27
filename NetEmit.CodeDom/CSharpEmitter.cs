@@ -135,6 +135,12 @@ namespace NetEmit.CodeDom
 
         private static void AddConstant(NA.IType typ, ConstantDef member)
         {
+            var evaler = typ as NA.IEnum;
+            if (evaler != null)
+            {
+                var val = N.Create<NA.IEnumVal>(member.Name);
+                evaler.Values.Add(val);
+            }
             var holder = typ as NA.IHasFields;
             if (holder == null)
                 return;
