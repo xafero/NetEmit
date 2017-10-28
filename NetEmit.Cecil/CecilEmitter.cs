@@ -301,9 +301,9 @@ namespace NetEmit.Cecil
             var valParm = new ParameterDefinition("value", ParameterAttributes.None, evth);
             var evt = new EventDefinition(member.Name, eattr, evth)
             {
-                AddMethod = new MethodDefinition($"add_{member.Name}", mattr, voidRef)
-                { Parameters = { valParm } },
                 RemoveMethod = new MethodDefinition($"remove_{member.Name}", mattr, voidRef)
+                { Parameters = { valParm } },
+                AddMethod = new MethodDefinition($"add_{member.Name}", mattr, voidRef)
                 { Parameters = { valParm } }
             };
             typ.Methods.Add(evt.AddMethod);
