@@ -188,15 +188,14 @@ namespace NetEmit.Netfx
         {
             var voidRef = typeof(void);
             var prpRef = typeof(string);
-            var prmRefs = new Type[0];
+            var pargs = args.Select(a => a.Item2).ToArray();
             const PropertyAttributes attr = PropertyAttributes.None;
             var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
                         MethodAttributes.SpecialName | MethodAttributes.NewSlot;
             if (typ.IsInterface)
                 mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
             const CallingConventions call = CallingConventions.HasThis;
-            var prop = typ.DefineProperty(name, attr, call, prpRef, prmRefs);
-            var pargs = args.Select(a => a.Item2).ToArray();
+            var prop = typ.DefineProperty(name, attr, call, prpRef, pargs);
             var getter = typ.DefineMethod($"get_{name}", mattr, prpRef, pargs);
             if (!typ.IsInterface)
                 getter.SetMethodBody(new byte[1], 0, new byte[0], null, null);
