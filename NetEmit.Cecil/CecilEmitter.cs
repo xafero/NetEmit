@@ -212,12 +212,12 @@ namespace NetEmit.Cecil
         private static void AddConstant(ModuleDefinition mod, TypeDefinition typ, ConstantDef member)
         {
             var objRef = typ.IsEnum ? typ : mod.ImportReference(typeof(object));
-            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Static
-                                         | FieldAttributes.Literal;
+            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Static |
+                                         FieldAttributes.Literal | FieldAttributes.HasDefault;
             var constInt = typ.Fields.Count - 1;
             var fld = new FieldDefinition(member.Name, attr, objRef);
             typ.Fields.Add(fld);
-            fld.Constant = constInt + 42;
+            fld.Constant = constInt;
         }
 
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
