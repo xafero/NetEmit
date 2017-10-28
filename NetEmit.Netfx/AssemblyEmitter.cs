@@ -175,8 +175,9 @@ namespace NetEmit.Netfx
         private static void AddConstant(ModuleBuilder mod, TypeBuilder typ, ConstantDef member)
         {
             var objRef = typ.IsEnum ? typ : typeof(object);
-            const FieldAttributes attr = FieldAttributes.Public | FieldAttributes.Literal
-                                         | FieldAttributes.Static;
+            var attr = FieldAttributes.Public;
+            if (typ.IsEnum)
+                attr |= FieldAttributes.Literal | FieldAttributes.Static;
             const int constInt = 1;
             var fld = typ.DefineField(member.Name, objRef, attr);
             if (typ.IsEnum)

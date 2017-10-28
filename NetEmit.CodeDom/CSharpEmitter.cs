@@ -144,7 +144,8 @@ namespace NetEmit.CodeDom
             var holder = typ as NA.IHasFields;
             if (holder == null)
                 return;
-            var fld = N.Create<NA.IField>(member.Name);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var fld = N.Create<NA.IField>(member.Name).With(attr);
             holder.Fields.Add(fld);
         }
 
