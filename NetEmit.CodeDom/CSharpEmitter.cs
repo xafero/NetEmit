@@ -187,7 +187,8 @@ namespace NetEmit.CodeDom
             var holder = typ as NA.IHasMethods;
             if (holder == null)
                 return;
-            var meth = N.Create<NA.IMethod>(member.Name);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var meth = N.Create<NA.IMethod>(member.Name).With(attr);
             holder.Methods.Add(meth);
         }
 

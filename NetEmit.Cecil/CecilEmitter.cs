@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using NetEmit.API;
 using EventAttributes = Mono.Cecil.EventAttributes;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
@@ -190,9 +191,9 @@ namespace NetEmit.Cecil
             var baseRef = mod.ImportReference(GetBaseType<object>(typ));
             var cla = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public
                                                              | TypeAttributes.BeforeFieldInit, baseRef);
-            cla.AddConstructor(mod, 1);
             mod.Types.Add(cla);
             AddMembers(mod, cla, typ);
+            cla.AddConstructor(mod, 1);
         }
 
         private static void AddMembers(ModuleDefinition mod, TypeDefinition typ, IHasMembers holder)
@@ -230,11 +231,21 @@ namespace NetEmit.Cecil
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
         {
             var voidRef = mod.ImportReference(typeof(void));
-            var attr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
+            var attr = MethodAttributes.Public | MethodAttributes.HideBySig;
             if (typ.IsAbstract())
-                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
             var meth = new MethodDefinition(member.Name, attr, voidRef);
+            if (!meth.IsAbstract)
+                AddMethodBody(meth);
             typ.Methods.Add(meth);
+        }
+
+        private static void AddMethodBody(MethodDefinition meth)
+        {
+            var body = new Mono.Cecil.Cil.MethodBody(meth);
+            var ils = body.GetILProcessor();
+            ils.Append(ils.Create(OpCodes.Ret));
+            meth.Body = body;
         }
 
         private static PropertyDefinition CreateProperty(ModuleDefinition mod, string name, bool isAbstract)

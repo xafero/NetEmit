@@ -93,8 +93,8 @@ namespace NetEmit.Netfx
         {
             const TypeAttributes attr = TypeAttributes.Public | TypeAttributes.BeforeFieldInit;
             var cla = mod.DefineType(GetFqn(nsp, typ), attr);
-            cla.AddConstructor();
             AddMembers(mod, cla, typ);
+            cla.AddConstructor();
             cla.CreateType();
         }
 
@@ -250,12 +250,18 @@ namespace NetEmit.Netfx
         {
             var retType = typeof(void);
             var prmTypes = new Type[0];
-            var attr = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
+            var attr = MethodAttributes.Public | MethodAttributes.HideBySig;
             if (typ.IsInterface)
-                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
             var meth = typ.DefineMethod(member.Name, attr, retType, prmTypes);
             if (!typ.IsInterface)
-                meth.SetMethodBody(new byte[1], 0, new byte[0], null, null);
+                AddMethodBody(meth);
+        }
+
+        private static void AddMethodBody(MethodBuilder meth)
+        {
+            var ils = new byte[] { 0x2A };
+            meth.SetMethodBody(ils, 0, new byte[0], null, null);
         }
 
         public void Dispose()
