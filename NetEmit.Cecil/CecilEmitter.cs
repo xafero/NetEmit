@@ -199,10 +199,10 @@ namespace NetEmit.Cecil
         {
             foreach (var member in holder.Members.OfType<MethodDef>())
                 AddMethod(mod, typ, member);
-            foreach (var member in holder.Members.OfType<EventDef>())
-                AddEvent(mod, typ, member);
             foreach (var member in holder.Members.OfType<PropertyDef>())
                 AddProperty(mod, typ, member);
+            foreach (var member in holder.Members.OfType<EventDef>())
+                AddEvent(mod, typ, member);
             foreach (var member in holder.Members.OfType<IndexerDef>())
                 AddIndexer(mod, typ, member);
             foreach (var member in holder.Members.OfType<ConstantDef>())
