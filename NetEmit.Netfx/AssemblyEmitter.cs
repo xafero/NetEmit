@@ -36,23 +36,23 @@ namespace NetEmit.Netfx
 
         private static void Emit(AssemblyDef ass, AssemblyBuilder bld)
         {
+            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
             bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
             bld.AddAttribute<AssemblyConfigurationAttribute>(ass.GetConfig());
             bld.AddAttribute<AssemblyCopyrightAttribute>(ass.GetCopyright());
             bld.AddAttribute<AssemblyDescriptionAttribute>(ass.GetDesc());
             bld.AddAttribute<AssemblyFileVersionAttribute>(ass.GetFileVersion());
-            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
             bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
-            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
-            bld.AddAttribute<RuntimeCompatibilityAttribute>(
-                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
-            );
             bld.AddAttribute<ComVisibleAttribute>(ass.Manifest.ComVisible);
-            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
             bld.AddAttribute<TargetFrameworkAttribute>(ass.GetFrameworkLabel(),
                 nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
             );
+            bld.AddAttribute<RuntimeCompatibilityAttribute>(
+                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
+            );
+            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
             var path = Path.GetFileName(ass.GetFileName());
             var mod = bld.DefineDynamicModule(path ?? ass.GetFileName());
             foreach (var nsp in ass.GetNamespaces())
@@ -214,6 +214,7 @@ namespace NetEmit.Netfx
         {
             var intr = typeof(int);
             CreateProperty(typ, member.Name, Tuple.Create("index", intr));
+            typ.AddAttribute<DefaultMemberAttribute>("Item");
         }
 
         private static void AddProperty(ModuleBuilder mod, TypeBuilder typ, PropertyDef member)

@@ -8,6 +8,12 @@ namespace NetEmit.Netfx
     public static class AssemblyExts
     {
         public static void AddAttribute<T>(this AssemblyBuilder bld, params object[] args) where T : Attribute
+            => bld.SetCustomAttribute(CreateAttribute<T>(args));
+
+        public static void AddAttribute<T>(this TypeBuilder bld, params object[] args) where T : Attribute
+            => bld.SetCustomAttribute(CreateAttribute<T>(args));
+
+        public static CustomAttributeBuilder CreateAttribute<T>(params object[] args) where T : Attribute
         {
             var type = typeof(T);
             var temp = args.OfType<Tuple<string, object>>().ToArray();
@@ -15,8 +21,7 @@ namespace NetEmit.Netfx
             var constrArgs = args.Except(temp).ToArray();
             var props = temp.Select(i => type.GetProperty(i.Item1)).ToArray();
             var propArgs = temp.Select(i => i.Item2).ToArray();
-            var attr = new CustomAttributeBuilder(constr, constrArgs, props, propArgs);
-            bld.SetCustomAttribute(attr);
+            return new CustomAttributeBuilder(constr, constrArgs, props, propArgs);
         }
 
         public static void AddConstructor(this TypeBuilder cla)

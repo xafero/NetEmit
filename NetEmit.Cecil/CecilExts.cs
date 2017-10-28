@@ -2,16 +2,23 @@
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 
 namespace NetEmit.Cecil
 {
     public static class CecilExts
     {
+        public static void AddAttribute<T>(this TypeDefinition bld, params object[] args) where T : Attribute
+            => AddAttribute<T>(bld.Module, bld.CustomAttributes, args);
+
         public static void AddAttribute<T>(this AssemblyDefinition bld, params object[] args) where T : Attribute
+            => AddAttribute<T>(bld.MainModule, bld.CustomAttributes, args);
+
+        public static void AddAttribute<T>(ModuleDefinition mod,
+            Collection<CustomAttribute> customs, params object[] args) where T : Attribute
         {
             var type = typeof(T);
             var temp = args.OfType<Tuple<string, object>>().ToArray();
-            var mod = bld.MainModule;
             var constrArgs = args.Except(temp).ToArray();
             var constrArgsTypes = constrArgs.Select(c => c.GetType()).ToArray();
             var constr = mod.ImportReference(type.GetConstructor(constrArgsTypes));
@@ -31,7 +38,7 @@ namespace NetEmit.Cecil
                 var pa = new CustomAttributeNamedArgument(prop.Name, aa);
                 attr.Properties.Add(pa);
             }
-            bld.CustomAttributes.Add(attr);
+            customs.Add(attr);
         }
 
         public static void AddConstructor(this TypeDefinition cla, ModuleDefinition mod,

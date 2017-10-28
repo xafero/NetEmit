@@ -80,23 +80,23 @@ namespace NetEmit.Cecil
 
         private static void Emit(AssemblyDef ass, AssemblyDefinition bld)
         {
+            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
             bld.AddAttribute<AssemblyCompanyAttribute>(ass.GetCompany());
             bld.AddAttribute<AssemblyConfigurationAttribute>(ass.GetConfig());
             bld.AddAttribute<AssemblyCopyrightAttribute>(ass.GetCopyright());
             bld.AddAttribute<AssemblyDescriptionAttribute>(ass.GetDesc());
             bld.AddAttribute<AssemblyFileVersionAttribute>(ass.GetFileVersion());
-            bld.AddAttribute<AssemblyProductAttribute>(ass.GetProduct());
+            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
             bld.AddAttribute<AssemblyTitleAttribute>(ass.GetTitle());
             bld.AddAttribute<AssemblyTrademarkAttribute>(ass.GetTrademark());
-            bld.AddAttribute<CompilationRelaxationsAttribute>((int)ass.GetRelaxations());
-            bld.AddAttribute<RuntimeCompatibilityAttribute>(
-                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
-            );
             bld.AddAttribute<ComVisibleAttribute>(ass.Manifest.ComVisible);
-            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
             bld.AddAttribute<TargetFrameworkAttribute>(ass.GetFrameworkLabel(),
                 nameof(TargetFrameworkAttribute.FrameworkDisplayName).Sets(ass.GetFrameworkName())
             );
+            bld.AddAttribute<RuntimeCompatibilityAttribute>(
+                nameof(RuntimeCompatibilityAttribute.WrapNonExceptionThrows).Sets(ass.ShouldWrapNonExceptions())
+            );
+            bld.AddAttribute<GuidAttribute>(ass.GetGuid());
             var mod = bld.MainModule;
             EmitResources(mod, ass.Resources);
             ApplyAttributes(mod, ass);
@@ -269,6 +269,7 @@ namespace NetEmit.Cecil
             setter.Parameters.Insert(0, parm);
             typ.Methods.Add(setter);
             typ.Properties.Add(indx);
+            typ.AddAttribute<DefaultMemberAttribute>("Item");
         }
 
         private static void AddEvent(ModuleDefinition mod, TypeDefinition typ, EventDef member)
