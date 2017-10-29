@@ -7,6 +7,8 @@ namespace NetEmit.Netfx
 {
     public static class AssemblyExts
     {
+        public static bool IsAbstract(this TypeBuilder typ) => typ.IsInterface | typ.IsAbstract;
+
         public static void AddAttribute<T>(this AssemblyBuilder bld, params object[] args) where T : Attribute
             => bld.SetCustomAttribute(CreateAttribute<T>(args));
 

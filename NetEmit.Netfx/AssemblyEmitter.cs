@@ -184,7 +184,7 @@ namespace NetEmit.Netfx
                 fld.SetConstant(constInt);
         }
 
-        private static void CreateProperty(TypeBuilder typ, string name,
+        private static PropertyBuilder CreateProperty(TypeBuilder typ, string name,
             params Tuple<string, Type>[] args)
         {
             var voidRef = typeof(void);
@@ -192,23 +192,20 @@ namespace NetEmit.Netfx
             var pargs = args.Select(a => a.Item2).ToArray();
             const PropertyAttributes attr = PropertyAttributes.None;
             var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName | MethodAttributes.NewSlot;
+                        MethodAttributes.SpecialName;
             if (typ.IsInterface)
-                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
             const CallingConventions call = CallingConventions.HasThis;
             var prop = typ.DefineProperty(name, attr, call, prpRef, pargs);
             var getter = typ.DefineMethod($"get_{name}", mattr, prpRef, pargs);
-            if (!typ.IsInterface)
-                getter.SetMethodBody(new byte[1], 0, new byte[0], null, null);
             getter.ApplyParams(args);
             var setPrms = pargs.Concat(new[] { prpRef }).ToArray();
             var setter = typ.DefineMethod($"set_{name}", mattr, voidRef, setPrms);
             setter.DefineParameter(setPrms.Length, ParameterAttributes.None, "value");
-            if (!typ.IsInterface)
-                setter.SetMethodBody(new byte[1], 0, new byte[0], null, null);
             setter.ApplyParams(args);
             prop.SetGetMethod(getter);
             prop.SetSetMethod(setter);
+            return prop;
         }
 
         private static void AddIndexer(ModuleBuilder mod, TypeBuilder typ, IndexerDef member)
@@ -220,7 +217,21 @@ namespace NetEmit.Netfx
 
         private static void AddProperty(ModuleBuilder mod, TypeBuilder typ, PropertyDef member)
         {
-            CreateProperty(typ, member.Name);
+            var prop = CreateProperty(typ, member.Name);
+            if (typ.IsAbstract())
+                return;
+            AddDefaultPropertyImpl((MethodBuilder)prop.GetMethod, (MethodBuilder)prop.SetMethod);
+        }
+
+        private static void AddDefaultPropertyImpl(MethodBuilder get, MethodBuilder set)
+        {
+            AddMethodBody(get);
+            AddMethodBody(set);
+            /*
+            ldarg.0
+            IL_0001: ldfld      string My.Service.Api.Book::'<Title>k__BackingField'
+            IL_0006: ret
+            */
         }
 
         private static void AddEvent(ModuleBuilder mod, TypeBuilder typ, EventDef member)

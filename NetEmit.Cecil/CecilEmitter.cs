@@ -240,10 +240,11 @@ namespace NetEmit.Cecil
             typ.Methods.Add(meth);
         }
 
-        private static void AddMethodBody(MethodDefinition meth)
+        private static void AddMethodBody(MethodDefinition meth, Action<ILProcessor> writeIl = null)
         {
             var body = new Mono.Cecil.Cil.MethodBody(meth);
             var ils = body.GetILProcessor();
+            writeIl?.Invoke(ils);
             ils.Append(ils.Create(OpCodes.Ret));
             meth.Body = body;
         }
@@ -254,9 +255,9 @@ namespace NetEmit.Cecil
             var prpRef = mod.ImportReference(typeof(string));
             const PropertyAttributes pattr = PropertyAttributes.None;
             var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName | MethodAttributes.NewSlot;
+                        MethodAttributes.SpecialName;
             if (isAbstract)
-                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
             var valParm = new ParameterDefinition("value", ParameterAttributes.None, prpRef);
             return new PropertyDefinition(name, pattr, prpRef)
             {
@@ -272,6 +273,38 @@ namespace NetEmit.Cecil
             typ.Methods.Add(prop.GetMethod);
             typ.Methods.Add(prop.SetMethod);
             typ.Properties.Add(prop);
+            if (typ.IsAbstract())
+                return;
+            AddDefaultPropertyImpl(prop.GetMethod, prop.SetMethod);
+        }
+
+        private static void AddDefaultPropertyImpl(MethodDefinition get, MethodDefinition set)
+        {
+            var backing = AddPropertyBackingField(get);
+            backing.AddAttribute<CompilerGeneratedAttribute>();
+            get.AddAttribute<CompilerGeneratedAttribute>();
+            AddMethodBody(get, i =>
+            {
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldfld, backing));
+            });
+            set.AddAttribute<CompilerGeneratedAttribute>();
+            AddMethodBody(set, i =>
+            {
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldarg_1));
+                i.Append(i.Create(OpCodes.Stfld, backing));
+            });
+        }
+
+        private static FieldDefinition AddPropertyBackingField(MethodDefinition get)
+        {
+            var typ = get.DeclaringType;
+            var name = get.Name.Split(new[] { '_' }, 2).Last();
+            const FieldAttributes attr = FieldAttributes.Private;
+            var backing = new FieldDefinition($"<{name}>k__BackingField", attr, get.ReturnType);
+            typ.Fields.Add(backing);
+            return backing;
         }
 
         private static void AddIndexer(ModuleDefinition mod, TypeDefinition typ, IndexerDef member)

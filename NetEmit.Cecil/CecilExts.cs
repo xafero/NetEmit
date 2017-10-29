@@ -8,6 +8,12 @@ namespace NetEmit.Cecil
 {
     public static class CecilExts
     {
+        public static void AddAttribute<T>(this FieldDefinition bld, params object[] args) where T : Attribute
+            => AddAttribute<T>(bld.Module, bld.CustomAttributes, args);
+
+        public static void AddAttribute<T>(this MethodDefinition bld, params object[] args) where T : Attribute
+            => AddAttribute<T>(bld.Module, bld.CustomAttributes, args);
+
         public static void AddAttribute<T>(this TypeDefinition bld, params object[] args) where T : Attribute
             => AddAttribute<T>(bld.Module, bld.CustomAttributes, args);
 

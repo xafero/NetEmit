@@ -167,7 +167,8 @@ namespace NetEmit.CodeDom
             var holder = typ as NA.IHasProperties;
             if (holder == null)
                 return;
-            var prop = N.Create<NA.IProperty>(member.Name);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var prop = N.Create<NA.IProperty>(member.Name).With(attr);
             prop.Type = typeof(string).FullName;
             holder.Properties.Add(prop);
         }
