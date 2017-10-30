@@ -162,14 +162,14 @@ namespace NetEmit.Netfx
         {
             foreach (var member in holder.Members.OfType<MethodDef>())
                 AddMethod(mod, typ, member);
+            foreach (var member in holder.Members.OfType<ConstantDef>())
+                AddConstant(mod, typ, member);
             foreach (var member in holder.Members.OfType<PropertyDef>())
                 AddProperty(mod, typ, member);
             foreach (var member in holder.Members.OfType<EventDef>())
                 AddEvent(mod, typ, member);
             foreach (var member in holder.Members.OfType<IndexerDef>())
                 AddIndexer(mod, typ, member);
-            foreach (var member in holder.Members.OfType<ConstantDef>())
-                AddConstant(mod, typ, member);
         }
 
         private static void AddConstant(ModuleBuilder mod, TypeBuilder typ, ConstantDef member)
