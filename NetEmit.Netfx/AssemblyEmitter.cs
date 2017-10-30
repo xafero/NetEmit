@@ -225,13 +225,29 @@ namespace NetEmit.Netfx
 
         private static void AddDefaultPropertyImpl(MethodBuilder get, MethodBuilder set)
         {
-            AddMethodBody(get);
-            AddMethodBody(set);
-            /*
-            ldarg.0
-            IL_0001: ldfld      string My.Service.Api.Book::'<Title>k__BackingField'
-            IL_0006: ret
-            */
+            var backing = AddPropertyBackingField(get);
+            backing.AddAttribute<CompilerGeneratedAttribute>();
+            get.AddAttribute<CompilerGeneratedAttribute>();
+            AddMethodBody(get, i =>
+            {
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldfld, backing);
+            });
+            set.AddAttribute<CompilerGeneratedAttribute>();
+            AddMethodBody(set, i =>
+            {
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldarg_1);
+                i.Emit(OpCodes.Stfld, backing);
+            });
+        }
+
+        private static FieldBuilder AddPropertyBackingField(MethodBuilder get)
+        {
+            var typ = (TypeBuilder)get.DeclaringType;
+            var name = get.Name.Split(new[] { '_' }, 2).Last();
+            const FieldAttributes attr = FieldAttributes.Private;
+            return typ.DefineField($"<{name}>k__BackingField", get.ReturnType, attr);
         }
 
         private static void AddEvent(ModuleBuilder mod, TypeBuilder typ, EventDef member)
@@ -269,10 +285,11 @@ namespace NetEmit.Netfx
                 AddMethodBody(meth);
         }
 
-        private static void AddMethodBody(MethodBuilder meth)
+        private static void AddMethodBody(MethodBuilder meth, Action<ILGenerator> writeIl = null)
         {
-            var ils = new byte[] { 0x2A };
-            meth.SetMethodBody(ils, 0, new byte[0], null, null);
+            var ils = meth.GetILGenerator();
+            writeIl?.Invoke(ils);
+            ils.Emit(OpCodes.Ret);
         }
 
         public void Dispose()

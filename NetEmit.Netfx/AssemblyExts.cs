@@ -15,6 +15,12 @@ namespace NetEmit.Netfx
         public static void AddAttribute<T>(this TypeBuilder bld, params object[] args) where T : Attribute
             => bld.SetCustomAttribute(CreateAttribute<T>(args));
 
+        public static void AddAttribute<T>(this MethodBuilder bld, params object[] args) where T : Attribute
+            => bld.SetCustomAttribute(CreateAttribute<T>(args));
+
+        public static void AddAttribute<T>(this FieldBuilder bld, params object[] args) where T : Attribute
+            => bld.SetCustomAttribute(CreateAttribute<T>(args));
+
         public static CustomAttributeBuilder CreateAttribute<T>(params object[] args) where T : Attribute
         {
             var type = typeof(T);
