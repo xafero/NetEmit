@@ -42,6 +42,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CilSortNormalizer.cs" />
     <Compile Include="EmitTests.cs" />
     <Compile Include="HelperFactory.cs" />
     <Compile Include="ILHelper.cs" />

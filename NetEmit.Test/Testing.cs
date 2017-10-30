@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
@@ -31,6 +32,7 @@ namespace NetEmit.Test
             using (var proc = Process.Start(new ProcessStartInfo(dasm.Item1, dasm.Item2)))
                 proc?.WaitForExit();
             Helper.Filter(ilFile);
+            CleanupFile(ilFile);
             if (File.Exists(targetFile))
                 File.Delete(targetFile);
             File.Move(file, file = targetFile);
@@ -41,6 +43,14 @@ namespace NetEmit.Test
             Assert.IsTrue(new FileInfo(file).Length >= 100);
             Assert.IsTrue(new FileInfo(ilFile).Length >= 100);
             return File.ReadAllText(ilFile, Encoding.UTF8);
+        }
+
+        private static void CleanupFile(string file)
+        {
+            var enc = Encoding.UTF8;
+            var raw = File.ReadAllText(file, enc);
+            var text = Cleanup(raw);
+            File.WriteAllText(file, text, enc);
         }
 
         internal static void CompareIlOutput(IAssemblyEmitter[] gens, Func<IAssemblyEmitter, string> ilgen)
@@ -94,5 +104,7 @@ namespace NetEmit.Test
                 }
             }
         }
+
+        internal static string Cleanup(string text) => (new CilSortNormalizer()).Normalize(text);
     }
 }
