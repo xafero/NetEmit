@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace NetEmit.Test
@@ -18,6 +19,8 @@ namespace NetEmit.Test
         private readonly Regex _evt;
         private readonly Regex _add;
         private readonly Regex _rem;
+        private readonly Regex _ass;
+        private readonly Regex _cus;
 
         public CilSortNormalizer()
         {
@@ -27,12 +30,29 @@ namespace NetEmit.Test
             _evt = CreateRegex("\\.event.*?(?=})");
             _add = CreateRegex("\\.addon.*?(?=\\))");
             _rem = CreateRegex("\\.removeon.*?(?=\\))");
+            _ass = CreateRegex("\\.assembly.*?(?=})");
+            _cus = CreateRegex("\\.custom instance.*?(?= \\))");
         }
 
         public string Normalize(string text)
         {
             text = NormalizeBlock(text, _prop, _get, _set);
             text = NormalizeBlock(text, _evt, _add, _rem);
+            text = NormalizeList(text, _ass, _cus);
+            return text;
+        }
+
+        private static string NormalizeList(string text, Regex root, Regex entry)
+        {
+            var asses = Matches(root, text);
+            foreach (var ass in asses)
+            {
+                var assTxt = ass.Value;
+                var cuss = Matches(entry, assTxt).Select(m => new MyMatch(m, ass.Index, text)).ToList();
+                if (!cuss.Any())
+                    continue;
+                text = Replace(text, ass.Index, cuss);
+            }
             return text;
         }
 
@@ -67,6 +87,41 @@ namespace NetEmit.Test
             text = text.Insert(offset + first.Index, second.Value + ")" + Environment.NewLine +
                 "    " + first.Value + ")" + Environment.NewLine);
             return text;
+        }
+
+        private static string Replace(string text, int offset, ICollection<MyMatch> matches)
+        {
+            var first = matches.First();
+            var total = matches.Sum(m => m.Length + 2);
+            text = text.Remove(offset + first.Index, total);
+            var body = new StringBuilder();
+            foreach (var match in matches.OrderBy(m => m.Value))
+            {
+                if (body.Length >= 1)
+                    body.Append("  ");
+                body.Append(match.Value);
+            }
+            text = text.Insert(offset + first.Index, body + "  ");
+            return text;
+        }
+
+        private class MyMatch
+        {
+            public MyMatch(Capture m, int offset, string text)
+            {
+                var start = offset + m.Index;
+                var lineFeed = text.IndexOf('\n', start + m.Length);
+                var result = text.Substring(start, lineFeed - start) + '\n';
+                Index = m.Index;
+                Length = result.Length;
+                Value = result;
+            }
+
+            public int Length { get; }
+            public int Index { get; }
+            public string Value { get; }
+
+            public override string ToString() => $"({Index}+{Length}) {Value}";
         }
     }
 }
