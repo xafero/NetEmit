@@ -305,7 +305,7 @@ namespace NetEmit.Cecil
             var dictType = typeof(Dictionary<int, string>);
             var getItem = dictType.GetMethods().First(m => m.Name == "get_Item");
             var setItem = dictType.GetMethods().First(m => m.Name == "set_Item");
-            var backing = AddPropertyBackingField(get, mod.ImportReference(dictType));
+            var backing = AddPropertyBackingField(get, mod.ImportReference(dictType), "idx");
             AddMethodBody(get, i =>
             {
                 i.Append(i.Create(OpCodes.Ldarg_0));
@@ -320,16 +320,17 @@ namespace NetEmit.Cecil
                 i.Append(i.Create(OpCodes.Ldarg_1));
                 i.Append(i.Create(OpCodes.Ldarg_2));
                 i.Append(i.Create(OpCodes.Callvirt, mod.ImportReference(setItem)));
-                i.Append(i.Create(OpCodes.Nop));
             });
         }
 
-        private static FieldDefinition AddPropertyBackingField(MethodDefinition get, TypeReference rt = null)
+        private static FieldDefinition AddPropertyBackingField(MethodDefinition get,
+            TypeReference rt = null, string fieldName = null)
         {
             var typ = get.DeclaringType;
             var name = get.Name.Split(new[] { '_' }, 2).Last();
             const FieldAttributes attr = FieldAttributes.Private;
-            var backing = new FieldDefinition($"<{name}>k__BackingField", attr, rt ?? get.ReturnType);
+            fieldName = fieldName ?? $"<{name}>k__BackingField";
+            var backing = new FieldDefinition(fieldName, attr, rt ?? get.ReturnType);
             typ.Fields.Add(backing);
             return backing;
         }
@@ -428,7 +429,7 @@ namespace NetEmit.Cecil
             setter.Parameters.Insert(0, parm);
             typ.Methods.Add(setter);
             typ.Properties.Add(indx);
-            // typ.AddAttribute<DefaultMemberAttribute>("Item");
+            typ.AddAttribute<DefaultMemberAttribute>("Item");
             if (typ.IsAbstract())
                 return;
             AddDefaultIndexerImpl(indx.GetMethod, indx.SetMethod);

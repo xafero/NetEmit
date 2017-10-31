@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Text;
 using Microsoft.CSharp;
 using NetEmit.API;
 using Noaster.Dist;
+using Noaster.Impl.Parts;
 using N = Noaster.Dist.Noaster;
 using NA = Noaster.Api;
 
@@ -152,14 +154,23 @@ namespace NetEmit.CodeDom
         private static void AddIndexer(NA.IType typ, IndexerDef member)
         {
             var holder = typ as NA.IHasIndexers;
-            if (holder == null || !(typ is NA.IInterface))
+            if (holder == null)
                 return;
-            var indx = N.Create<NA.IIndexer>(member.Name);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var indx = N.Create<NA.IIndexer>(member.Name).With(attr);
             indx.Type = typeof(string).FullName;
             var parm = N.Create<NA.IParameter>("index");
             parm.Type = typeof(int).FullName;
             indx.Parameters.Add(parm);
             holder.Indexers.Add(indx);
+            var fielder = typ as NA.IHasFields;
+            if (typ.IsAbstract() || fielder == null)
+                return;
+            var dictType = $"System.Collections.Generic.Dictionary<{parm.Type},{indx.Type}>";
+            var idxBack = new FieldImpl("idx", dictType);
+            fielder.Fields.Add(idxBack);
+            indx.Getter = "return this.idx[index];";
+            indx.Setter = "this.idx[index] = value;";
         }
 
         private static void AddProperty(NA.IType typ, PropertyDef member)

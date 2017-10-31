@@ -3,11 +3,15 @@ using System.CodeDom.Compiler;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Noaster.Api;
 
 namespace NetEmit.CodeDom
 {
     public static class CSharpExts
     {
+        public static bool IsAbstract(this IType typ) =>
+            typ is IInterface | ((typ as IClass)?.Modifier.HasFlag(Modifier.Abstract) ?? false);
+
         private static string ToCode(this object value) =>
             value is bool ? value.ToString().ToLowerInvariant() :
             value is string ? '"' + value.ToString() + '"' : value.ToString();

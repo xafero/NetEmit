@@ -214,7 +214,7 @@ namespace NetEmit.Netfx
         {
             var intr = typeof(int);
             var prop = CreateProperty(typ, member.Name, Tuple.Create("index", intr));
-            //typ.AddAttribute<DefaultMemberAttribute>("Item");
+            typ.AddAttribute<DefaultMemberAttribute>("Item");
             if (typ.IsAbstract())
                 return;
             AddDefaultIndexerImpl((MethodBuilder)prop.GetMethod, (MethodBuilder)prop.SetMethod);
@@ -252,7 +252,7 @@ namespace NetEmit.Netfx
             var dictType = typeof(Dictionary<int, string>);
             var getItem = dictType.GetMethods().First(m => m.Name == "get_Item");
             var setItem = dictType.GetMethods().First(m => m.Name == "set_Item");
-            var backing = AddPropertyBackingField(get, dictType);
+            var backing = AddPropertyBackingField(get, dictType, "idx");
             AddMethodBody(get, i =>
             {
                 i.Emit(OpCodes.Ldarg_0);
@@ -267,16 +267,17 @@ namespace NetEmit.Netfx
                 i.Emit(OpCodes.Ldarg_1);
                 i.Emit(OpCodes.Ldarg_2);
                 i.Emit(OpCodes.Callvirt, setItem);
-                i.Emit(OpCodes.Nop);
             });
         }
 
-        private static FieldBuilder AddPropertyBackingField(MethodBuilder get, Type rt = null)
+        private static FieldBuilder AddPropertyBackingField(MethodBuilder get,
+            Type rt = null, string fieldName = null)
         {
             var typ = (TypeBuilder)get.DeclaringType;
             var name = get.Name.Split(new[] { '_' }, 2).Last();
             const FieldAttributes attr = FieldAttributes.Private;
-            return typ?.DefineField($"<{name}>k__BackingField", rt ?? get.ReturnType, attr);
+            fieldName = fieldName ?? $"<{name}>k__BackingField";
+            return typ?.DefineField(fieldName, rt ?? get.ReturnType, attr);
         }
 
         private static FieldBuilder AddEventBackingField(MethodBuilder add, Type prmType)
