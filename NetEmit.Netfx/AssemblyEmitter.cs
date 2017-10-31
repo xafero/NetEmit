@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Threading;
 using NetEmit.API;
 
 using MA = System.Reflection.MethodAttributes;
@@ -250,7 +251,15 @@ namespace NetEmit.Netfx
             var typ = (TypeBuilder)get.DeclaringType;
             var name = get.Name.Split(new[] { '_' }, 2).Last();
             const FieldAttributes attr = FieldAttributes.Private;
-            return typ.DefineField($"<{name}>k__BackingField", get.ReturnType, attr);
+            return typ?.DefineField($"<{name}>k__BackingField", get.ReturnType, attr);
+        }
+
+        private static FieldBuilder AddEventBackingField(MethodBuilder add, Type prmType)
+        {
+            var typ = (TypeBuilder)add.DeclaringType;
+            var name = add.Name.Split(new[] { '_' }, 2).Last();
+            const FieldAttributes attr = FieldAttributes.Private;
+            return typ?.DefineField($"{name}", prmType, attr);
         }
 
         private static void AddEvent(ModuleBuilder mod, TypeBuilder typ, EventDef member)
@@ -264,14 +273,82 @@ namespace NetEmit.Netfx
             var evt = typ.DefineEvent(member.Name, attr, evth);
             var adder = typ.DefineMethod($"add_{member.Name}", mattr, voidRef, new[] { evth });
             adder.DefineParameter(1, ParameterAttributes.None, "value");
-            if (!typ.IsInterface)
-                adder.SetMethodBody(new byte[1], 0, new byte[0], null, null);
             var remover = typ.DefineMethod($"remove_{member.Name}", mattr, voidRef, new[] { evth });
             remover.DefineParameter(1, ParameterAttributes.None, "value");
-            if (!typ.IsInterface)
-                remover.SetMethodBody(new byte[1], 0, new byte[0], null, null);
             evt.SetAddOnMethod(adder);
             evt.SetRemoveOnMethod(remover);
+            if (typ.IsAbstract())
+                return;
+            AddDefaultEventImpl(adder, remover, evth);
+        }
+
+        private static void AddDefaultEventImpl(MethodBuilder add, MethodBuilder rem, Type evtType)
+        {
+            var dlgt = typeof(Delegate);
+            var combineMeth = dlgt.GetMethod(nameof(Delegate.Combine), new[] { dlgt, dlgt });
+            var removeMeth = dlgt.GetMethod(nameof(Delegate.Remove), new[] { dlgt, dlgt });
+            var compareMeth = typeof(Interlocked).GetMethods().Where(
+                    m => m.Name == nameof(Interlocked.CompareExchange)).Single(
+                    m => m.GetParameters().Length == 3 && m.IsGenericMethod)
+                .MakeGenericMethod(typeof(EventHandler));
+            var backing = AddEventBackingField(add, evtType);
+            var evtt = typeof(EventHandler);
+            Action<ILGenerator> init = il =>
+            {
+                il.DeclareLocal(evtt);
+                il.DeclareLocal(evtt);
+                il.DeclareLocal(evtt);
+            };
+            AddMethodBody(add, i =>
+            {
+                init(i);
+                var jmp = i.DefineLabel();
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldfld, backing);
+                i.Emit(OpCodes.Stloc_0);
+                i.MarkLabel(jmp);
+                i.Emit(OpCodes.Ldloc_0);
+                i.Emit(OpCodes.Stloc_1);
+                i.Emit(OpCodes.Ldloc_1);
+                i.Emit(OpCodes.Ldarg_1);
+                i.Emit(OpCodes.Call, combineMeth);
+                i.Emit(OpCodes.Castclass, backing.FieldType);
+                i.Emit(OpCodes.Stloc_2);
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldflda, backing);
+                i.Emit(OpCodes.Ldloc_2);
+                i.Emit(OpCodes.Ldloc_1);
+                i.Emit(OpCodes.Call, compareMeth);
+                i.Emit(OpCodes.Stloc_0);
+                i.Emit(OpCodes.Ldloc_0);
+                i.Emit(OpCodes.Ldloc_1);
+                i.Emit(OpCodes.Bne_Un_S, jmp);
+            });
+            AddMethodBody(rem, i =>
+            {
+                init(i);
+                var jmp = i.DefineLabel();
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldfld, backing);
+                i.Emit(OpCodes.Stloc_0);
+                i.MarkLabel(jmp);
+                i.Emit(OpCodes.Ldloc_0);
+                i.Emit(OpCodes.Stloc_1);
+                i.Emit(OpCodes.Ldloc_1);
+                i.Emit(OpCodes.Ldarg_1);
+                i.Emit(OpCodes.Call, removeMeth);
+                i.Emit(OpCodes.Castclass, backing.FieldType);
+                i.Emit(OpCodes.Stloc_2);
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldflda, backing);
+                i.Emit(OpCodes.Ldloc_2);
+                i.Emit(OpCodes.Ldloc_1);
+                i.Emit(OpCodes.Call, compareMeth);
+                i.Emit(OpCodes.Stloc_0);
+                i.Emit(OpCodes.Ldloc_0);
+                i.Emit(OpCodes.Ldloc_1);
+                i.Emit(OpCodes.Bne_Un_S, jmp);
+            });
         }
 
         private static void AddMethod(ModuleBuilder mod, TypeBuilder typ, MethodDef member)
