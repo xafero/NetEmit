@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Resources;
 using System.Text;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
