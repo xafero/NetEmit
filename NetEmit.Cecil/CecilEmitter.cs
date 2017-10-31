@@ -9,6 +9,7 @@ using System.Runtime.Versioning;
 using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using NetEmit.API;
 using EventAttributes = Mono.Cecil.EventAttributes;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
@@ -270,7 +271,7 @@ namespace NetEmit.Cecil
 
         private static void AddProperty(ModuleDefinition mod, TypeDefinition typ, PropertyDef member)
         {
-            var prop = CreateProperty(mod, member.Name, typ.IsInterface | typ.IsAbstract);
+            var prop = CreateProperty(mod, member.Name, typ.IsAbstract());
             typ.Methods.Add(prop.GetMethod);
             typ.Methods.Add(prop.SetMethod);
             typ.Properties.Add(prop);
@@ -298,12 +299,37 @@ namespace NetEmit.Cecil
             });
         }
 
-        private static FieldDefinition AddPropertyBackingField(MethodDefinition get)
+        private static void AddDefaultIndexerImpl(MethodDefinition get, MethodDefinition set)
+        {
+            var mod = get.DeclaringType.Module;
+            var dictType = typeof(Dictionary<int, string>);
+            var getItem = dictType.GetMethods().First(m => m.Name == "get_Item");
+            var setItem = dictType.GetMethods().First(m => m.Name == "set_Item");
+            var backing = AddPropertyBackingField(get, mod.ImportReference(dictType));
+            AddMethodBody(get, i =>
+            {
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldfld, backing));
+                i.Append(i.Create(OpCodes.Ldarg_1));
+                i.Append(i.Create(OpCodes.Callvirt, mod.ImportReference(getItem)));
+            });
+            AddMethodBody(set, i =>
+            {
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldfld, backing));
+                i.Append(i.Create(OpCodes.Ldarg_1));
+                i.Append(i.Create(OpCodes.Ldarg_2));
+                i.Append(i.Create(OpCodes.Callvirt, mod.ImportReference(setItem)));
+                i.Append(i.Create(OpCodes.Nop));
+            });
+        }
+
+        private static FieldDefinition AddPropertyBackingField(MethodDefinition get, TypeReference rt = null)
         {
             var typ = get.DeclaringType;
             var name = get.Name.Split(new[] { '_' }, 2).Last();
             const FieldAttributes attr = FieldAttributes.Private;
-            var backing = new FieldDefinition($"<{name}>k__BackingField", attr, get.ReturnType);
+            var backing = new FieldDefinition($"<{name}>k__BackingField", attr, rt ?? get.ReturnType);
             typ.Fields.Add(backing);
             return backing;
         }
@@ -392,7 +418,7 @@ namespace NetEmit.Cecil
         private static void AddIndexer(ModuleDefinition mod, TypeDefinition typ, IndexerDef member)
         {
             var intr = mod.ImportReference(typeof(int));
-            var indx = CreateProperty(mod, member.Name, typ.IsInterface | typ.IsAbstract);
+            var indx = CreateProperty(mod, member.Name, typ.IsAbstract());
             const ParameterAttributes pattr = ParameterAttributes.None;
             var parm = new ParameterDefinition("index", pattr, intr);
             var getter = indx.GetMethod;
@@ -402,7 +428,10 @@ namespace NetEmit.Cecil
             setter.Parameters.Insert(0, parm);
             typ.Methods.Add(setter);
             typ.Properties.Add(indx);
-            typ.AddAttribute<DefaultMemberAttribute>("Item");
+            // typ.AddAttribute<DefaultMemberAttribute>("Item");
+            if (typ.IsAbstract())
+                return;
+            AddDefaultIndexerImpl(indx.GetMethod, indx.SetMethod);
         }
 
         private static void AddEvent(ModuleDefinition mod, TypeDefinition typ, EventDef member)

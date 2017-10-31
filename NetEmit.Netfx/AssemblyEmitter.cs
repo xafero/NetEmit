@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -213,10 +214,10 @@ namespace NetEmit.Netfx
         {
             var intr = typeof(int);
             var prop = CreateProperty(typ, member.Name, Tuple.Create("index", intr));
-            typ.AddAttribute<DefaultMemberAttribute>("Item");
+            //typ.AddAttribute<DefaultMemberAttribute>("Item");
             if (typ.IsAbstract())
                 return;
-            AddDefaultPropertyImpl((MethodBuilder)prop.GetMethod, (MethodBuilder)prop.SetMethod);
+            AddDefaultIndexerImpl((MethodBuilder)prop.GetMethod, (MethodBuilder)prop.SetMethod);
         }
 
         private static void AddProperty(ModuleBuilder mod, TypeBuilder typ, PropertyDef member)
@@ -246,12 +247,36 @@ namespace NetEmit.Netfx
             });
         }
 
-        private static FieldBuilder AddPropertyBackingField(MethodBuilder get)
+        private static void AddDefaultIndexerImpl(MethodBuilder get, MethodBuilder set)
+        {
+            var dictType = typeof(Dictionary<int, string>);
+            var getItem = dictType.GetMethods().First(m => m.Name == "get_Item");
+            var setItem = dictType.GetMethods().First(m => m.Name == "set_Item");
+            var backing = AddPropertyBackingField(get, dictType);
+            AddMethodBody(get, i =>
+            {
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldfld, backing);
+                i.Emit(OpCodes.Ldarg_1);
+                i.Emit(OpCodes.Callvirt, getItem);
+            });
+            AddMethodBody(set, i =>
+            {
+                i.Emit(OpCodes.Ldarg_0);
+                i.Emit(OpCodes.Ldfld, backing);
+                i.Emit(OpCodes.Ldarg_1);
+                i.Emit(OpCodes.Ldarg_2);
+                i.Emit(OpCodes.Callvirt, setItem);
+                i.Emit(OpCodes.Nop);
+            });
+        }
+
+        private static FieldBuilder AddPropertyBackingField(MethodBuilder get, Type rt = null)
         {
             var typ = (TypeBuilder)get.DeclaringType;
             var name = get.Name.Split(new[] { '_' }, 2).Last();
             const FieldAttributes attr = FieldAttributes.Private;
-            return typ?.DefineField($"<{name}>k__BackingField", get.ReturnType, attr);
+            return typ?.DefineField($"<{name}>k__BackingField", rt ?? get.ReturnType, attr);
         }
 
         private static FieldBuilder AddEventBackingField(MethodBuilder add, Type prmType)
