@@ -21,6 +21,8 @@ namespace NetEmit.Test
         private readonly Regex _rem;
         private readonly Regex _ass;
         private readonly Regex _cus;
+        private readonly Regex _cla;
+        private readonly Regex _fld;
 
         public CilSortNormalizer()
         {
@@ -32,6 +34,8 @@ namespace NetEmit.Test
             _rem = CreateRegex("\\.removeon.*?(?=\\))");
             _ass = CreateRegex("\\.assembly.*?(?=})");
             _cus = CreateRegex("\\.custom instance.*?(?= \\))");
+            _cla = CreateRegex("\\.class.*?(?=})");
+            _fld = CreateRegex("\\.field.*?(?=\\n)");
         }
 
         public string Normalize(string text)
@@ -39,6 +43,7 @@ namespace NetEmit.Test
             text = NormalizeBlock(text, _prop, _get, _set);
             text = NormalizeBlock(text, _evt, _add, _rem);
             text = NormalizeList(text, _ass, _cus);
+            text = NormalizeList(text, _cla, _fld);
             return text;
         }
 
