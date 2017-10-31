@@ -123,14 +123,14 @@ namespace NetEmit.CodeDom
         {
             foreach (var member in holder.Members.OfType<MethodDef>())
                 AddMethod(typ, member);
-            foreach (var member in holder.Members.OfType<EventDef>())
-                AddEvent(typ, member);
-            foreach (var member in holder.Members.OfType<PropertyDef>())
-                AddProperty(typ, member);
-            foreach (var member in holder.Members.OfType<IndexerDef>())
-                AddIndexer(typ, member);
             foreach (var member in holder.Members.OfType<ConstantDef>())
                 AddConstant(typ, member);
+            foreach (var member in holder.Members.OfType<PropertyDef>())
+                AddProperty(typ, member);
+            foreach (var member in holder.Members.OfType<EventDef>())
+                AddEvent(typ, member);
+            foreach (var member in holder.Members.OfType<IndexerDef>())
+                AddIndexer(typ, member);
         }
 
         private static void AddConstant(NA.IType typ, ConstantDef member)
@@ -178,7 +178,8 @@ namespace NetEmit.CodeDom
             var holder = typ as NA.IHasEvents;
             if (holder == null)
                 return;
-            var evt = N.Create<NA.IEvent>(member.Name);
+            const NA.Visibility attr = NA.Visibility.Public;
+            var evt = N.Create<NA.IEvent>(member.Name).With(attr);
             evt.Type = typeof(EventHandler).FullName;
             holder.Events.Add(evt);
         }

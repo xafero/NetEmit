@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Threading;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NetEmit.API;
 using EventAttributes = Mono.Cecil.EventAttributes;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
+using MA = Mono.Cecil.MethodAttributes;
+using MethodBody = Mono.Cecil.Cil.MethodBody;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
 using ParameterAttributes = Mono.Cecil.ParameterAttributes;
 using PropertyAttributes = Mono.Cecil.PropertyAttributes;
 using TypeAttributes = Mono.Cecil.TypeAttributes;
@@ -160,8 +164,7 @@ namespace NetEmit.Cecil
             var dlg = new TypeDefinition(nsp.Name, typ.Name, TypeAttributes.Public | TypeAttributes.Sealed, dlgRef);
             dlg.AddConstructor(mod, null, Tuple.Create("object", typeof(object)),
                 Tuple.Create("method", typeof(IntPtr)));
-            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                                           MethodAttributes.NewSlot | MethodAttributes.Virtual;
+            const MA mattr = MA.Public | MA.HideBySig | MA.NewSlot | MA.Virtual;
             var invMeth = new MethodDefinition("Invoke", mattr, voidRef) { IsRuntime = true };
             dlg.Methods.Add(invMeth);
             var arr = mod.ImportReference(typeof(IAsyncResult));
@@ -231,9 +234,9 @@ namespace NetEmit.Cecil
         private static void AddMethod(ModuleDefinition mod, TypeDefinition typ, MethodDef member)
         {
             var voidRef = mod.ImportReference(typeof(void));
-            var attr = MethodAttributes.Public | MethodAttributes.HideBySig;
+            var attr = MA.Public | MA.HideBySig;
             if (typ.IsAbstract())
-                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
+                attr |= MA.Abstract | MA.Virtual | MA.NewSlot;
             var meth = new MethodDefinition(member.Name, attr, voidRef);
             if (!meth.IsAbstract)
                 AddMethodBody(meth);
@@ -242,7 +245,7 @@ namespace NetEmit.Cecil
 
         private static void AddMethodBody(MethodDefinition meth, Action<ILProcessor> writeIl = null)
         {
-            var body = new Mono.Cecil.Cil.MethodBody(meth);
+            var body = meth.Body ?? new MethodBody(meth);
             var ils = body.GetILProcessor();
             writeIl?.Invoke(ils);
             ils.Append(ils.Create(OpCodes.Ret));
@@ -254,10 +257,9 @@ namespace NetEmit.Cecil
             var voidRef = mod.ImportReference(typeof(void));
             var prpRef = mod.ImportReference(typeof(string));
             const PropertyAttributes pattr = PropertyAttributes.None;
-            var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName;
+            var mattr = MA.Public | MA.HideBySig | MA.SpecialName;
             if (isAbstract)
-                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
+                mattr |= MA.Abstract | MA.Virtual | MA.NewSlot;
             var valParm = new ParameterDefinition("value", ParameterAttributes.None, prpRef);
             return new PropertyDefinition(name, pattr, prpRef)
             {
@@ -307,6 +309,87 @@ namespace NetEmit.Cecil
             return backing;
         }
 
+        private static FieldDefinition AddEventBackingField(MethodDefinition add)
+        {
+            var typ = add.DeclaringType;
+            var name = add.Name.Split(new[] { '_' }, 2).Last();
+            const FieldAttributes attr = FieldAttributes.Private;
+            var backing = new FieldDefinition($"{name}", attr, add.Parameters.First().ParameterType);
+            var firstNot = typ.Fields.FirstOrDefault(f => f.Name.Contains("k__BackingField"));
+            var index = firstNot == null ? 0 : typ.Fields.IndexOf(firstNot);
+            typ.Fields.Insert(index, backing);
+            return backing;
+        }
+
+        private static void AddDefaultEventImpl(MethodDefinition add, MethodDefinition rem)
+        {
+            var mod = add.DeclaringType.Module;
+            var backing = AddEventBackingField(add);
+            var dlgt = typeof(Delegate);
+            var combineMeth = dlgt.GetMethod(nameof(Delegate.Combine), new[] { dlgt, dlgt });
+            var removeMeth = dlgt.GetMethod(nameof(Delegate.Remove), new[] { dlgt, dlgt });
+            var compareMeth = typeof(Interlocked).GetMethods().Where(
+                    m => m.Name == nameof(Interlocked.CompareExchange)).Single(
+                    m => m.GetParameters().Length == 3 && m.IsGenericMethod)
+                .MakeGenericMethod(typeof(EventHandler));
+            var evtt = mod.ImportReference(typeof(EventHandler));
+            Action<MethodBody> init = body =>
+            {
+                body.Variables.Add(new VariableDefinition(evtt));
+                body.Variables.Add(new VariableDefinition(evtt));
+                body.Variables.Add(new VariableDefinition(evtt));
+                body.InitLocals = true;
+            };
+            init(add.Body);
+            AddMethodBody(add, i =>
+            {
+                Instruction jmp;
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldfld, backing));
+                i.Append(i.Create(OpCodes.Stloc_0));
+                i.Append(jmp = i.Create(OpCodes.Ldloc_0));
+                i.Append(i.Create(OpCodes.Stloc_1));
+                i.Append(i.Create(OpCodes.Ldloc_1));
+                i.Append(i.Create(OpCodes.Ldarg_1));
+                i.Append(i.Create(OpCodes.Call, mod.ImportReference(combineMeth)));
+                i.Append(i.Create(OpCodes.Castclass, backing.FieldType));
+                i.Append(i.Create(OpCodes.Stloc_2));
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldflda, backing));
+                i.Append(i.Create(OpCodes.Ldloc_2));
+                i.Append(i.Create(OpCodes.Ldloc_1));
+                i.Append(i.Create(OpCodes.Call, mod.ImportReference(compareMeth)));
+                i.Append(i.Create(OpCodes.Stloc_0));
+                i.Append(i.Create(OpCodes.Ldloc_0));
+                i.Append(i.Create(OpCodes.Ldloc_1));
+                i.Append(i.Create(OpCodes.Bne_Un_S, jmp));
+            });
+            init(rem.Body);
+            AddMethodBody(rem, i =>
+            {
+                Instruction jmp;
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldfld, backing));
+                i.Append(i.Create(OpCodes.Stloc_0));
+                i.Append(jmp = i.Create(OpCodes.Ldloc_0));
+                i.Append(i.Create(OpCodes.Stloc_1));
+                i.Append(i.Create(OpCodes.Ldloc_1));
+                i.Append(i.Create(OpCodes.Ldarg_1));
+                i.Append(i.Create(OpCodes.Call, mod.ImportReference(removeMeth)));
+                i.Append(i.Create(OpCodes.Castclass, backing.FieldType));
+                i.Append(i.Create(OpCodes.Stloc_2));
+                i.Append(i.Create(OpCodes.Ldarg_0));
+                i.Append(i.Create(OpCodes.Ldflda, backing));
+                i.Append(i.Create(OpCodes.Ldloc_2));
+                i.Append(i.Create(OpCodes.Ldloc_1));
+                i.Append(i.Create(OpCodes.Call, mod.ImportReference(compareMeth)));
+                i.Append(i.Create(OpCodes.Stloc_0));
+                i.Append(i.Create(OpCodes.Ldloc_0));
+                i.Append(i.Create(OpCodes.Ldloc_1));
+                i.Append(i.Create(OpCodes.Bne_Un_S, jmp));
+            });
+        }
+
         private static void AddIndexer(ModuleDefinition mod, TypeDefinition typ, IndexerDef member)
         {
             var intr = mod.ImportReference(typeof(int));
@@ -328,9 +411,9 @@ namespace NetEmit.Cecil
             var voidRef = mod.ImportReference(typeof(void));
             var evth = mod.ImportReference(typeof(EventHandler));
             const EventAttributes eattr = EventAttributes.None;
-            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                                           MethodAttributes.SpecialName | MethodAttributes.NewSlot |
-                                           MethodAttributes.Abstract | MethodAttributes.Virtual;
+            var mattr = MA.Public | MA.HideBySig | MA.SpecialName;
+            if (typ.IsAbstract())
+                mattr |= MA.NewSlot | MA.Abstract | MA.Virtual;
             var valParm = new ParameterDefinition("value", ParameterAttributes.None, evth);
             var evt = new EventDefinition(member.Name, eattr, evth)
             {
@@ -342,6 +425,9 @@ namespace NetEmit.Cecil
             typ.Methods.Add(evt.AddMethod);
             typ.Methods.Add(evt.RemoveMethod);
             typ.Events.Add(evt);
+            if (typ.IsAbstract())
+                return;
+            AddDefaultEventImpl(evt.AddMethod, evt.RemoveMethod);
         }
 
         private static Type GetBaseType<T>(TypeDef typ)

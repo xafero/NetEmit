@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using NetEmit.API;
 
+using MA = System.Reflection.MethodAttributes;
+
 namespace NetEmit.Netfx
 {
     public class AssemblyEmitter : IAssemblyEmitter
@@ -114,13 +116,12 @@ namespace NetEmit.Netfx
             var dlgt = mod.DefineType(GetFqn(nsp, typ), attr, under);
             const CallingConventions conv = CallingConventions.Standard;
             var tparm = new[] { typeof(object), typeof(IntPtr) };
-            const MethodAttributes cattr = MethodAttributes.Public | MethodAttributes.HideBySig;
+            const MA cattr = MA.Public | MA.HideBySig;
             var cstr = dlgt.DefineConstructor(cattr, conv, tparm);
             cstr.DefineParameter(1, ParameterAttributes.None, "object");
             cstr.DefineParameter(2, ParameterAttributes.None, "method");
             cstr.SetImplementationFlags(MethodImplAttributes.Runtime);
-            const MethodAttributes mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                                           MethodAttributes.NewSlot | MethodAttributes.Virtual;
+            const MA mattr = MA.Public | MA.HideBySig | MA.NewSlot | MA.Virtual;
             var inv = dlgt.DefineMethod("Invoke", mattr);
             inv.SetImplementationFlags(MethodImplAttributes.Runtime);
             var bgi = dlgt.DefineMethod("BeginInvoke", mattr, typeof(IAsyncResult),
@@ -191,10 +192,9 @@ namespace NetEmit.Netfx
             var prpRef = typeof(string);
             var pargs = args.Select(a => a.Item2).ToArray();
             const PropertyAttributes attr = PropertyAttributes.None;
-            var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                        MethodAttributes.SpecialName;
+            var mattr = MA.Public | MA.HideBySig | MA.SpecialName;
             if (typ.IsInterface)
-                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
+                mattr |= MA.Abstract | MA.Virtual | MA.NewSlot;
             const CallingConventions call = CallingConventions.HasThis;
             var prop = typ.DefineProperty(name, attr, call, prpRef, pargs);
             var getter = typ.DefineMethod($"get_{name}", mattr, prpRef, pargs);
@@ -211,8 +211,11 @@ namespace NetEmit.Netfx
         private static void AddIndexer(ModuleBuilder mod, TypeBuilder typ, IndexerDef member)
         {
             var intr = typeof(int);
-            CreateProperty(typ, member.Name, Tuple.Create("index", intr));
+            var prop = CreateProperty(typ, member.Name, Tuple.Create("index", intr));
             typ.AddAttribute<DefaultMemberAttribute>("Item");
+            if (typ.IsAbstract())
+                return;
+            AddDefaultPropertyImpl((MethodBuilder)prop.GetMethod, (MethodBuilder)prop.SetMethod);
         }
 
         private static void AddProperty(ModuleBuilder mod, TypeBuilder typ, PropertyDef member)
@@ -255,11 +258,9 @@ namespace NetEmit.Netfx
             var voidRef = typeof(void);
             var evth = typeof(EventHandler);
             const EventAttributes attr = EventAttributes.None;
-            var mattr = MethodAttributes.Public | MethodAttributes.HideBySig |
-                                           MethodAttributes.NewSlot | MethodAttributes.SpecialName |
-                                           MethodAttributes.Virtual;
-            if (typ.IsInterface)
-                mattr |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+            var mattr = MA.Public | MA.HideBySig | MA.SpecialName;
+            if (typ.IsAbstract())
+                mattr |= MA.Abstract | MA.Virtual | MA.NewSlot;
             var evt = typ.DefineEvent(member.Name, attr, evth);
             var adder = typ.DefineMethod($"add_{member.Name}", mattr, voidRef, new[] { evth });
             adder.DefineParameter(1, ParameterAttributes.None, "value");
@@ -277,9 +278,9 @@ namespace NetEmit.Netfx
         {
             var retType = typeof(void);
             var prmTypes = new Type[0];
-            var attr = MethodAttributes.Public | MethodAttributes.HideBySig;
+            var attr = MA.Public | MA.HideBySig;
             if (typ.IsInterface)
-                attr |= MethodAttributes.Abstract | MethodAttributes.Virtual | MethodAttributes.NewSlot;
+                attr |= MA.Abstract | MA.Virtual | MA.NewSlot;
             var meth = typ.DefineMethod(member.Name, attr, retType, prmTypes);
             if (!typ.IsInterface)
                 AddMethodBody(meth);
