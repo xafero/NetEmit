@@ -35,7 +35,7 @@ namespace NetEmit.Test
             _ass = CreateRegex("\\.assembly.*?(?=})");
             _cus = CreateRegex("\\.custom instance.*?(?= \\))");
             _cla = CreateRegex("\\.class.*?(?=})");
-            _fld = CreateRegex("\\.field.*?(?=\\n)");
+            _fld = CreateRegex("(\\.field|\\.custom).*?(?=\\n)");
         }
 
         public string Normalize(string text)
