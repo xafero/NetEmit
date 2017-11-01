@@ -23,7 +23,8 @@ namespace NetEmit.Test
         private static bool IsNeeded(string line)
             => new[]
             {
-                "// Method begins at RVA 0x", ".pack ", ".size "
+                "// Method begins at RVA 0x", ".pack ", ".size ", 
+                "DebuggerBrowsableAttribute", "// method line"
             }.All(l => !line.Contains(l));
     }
 }
