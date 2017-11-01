@@ -56,13 +56,15 @@ namespace NetEmit.Test
         {
             var ils = gens.ToDictionary(k => k.GetType().Name, ilgen);
             Assert.AreEqual(3, ils.Count);
-            Directory.CreateDirectory("res");
+            var root = TestContext.CurrentContext.TestDirectory;
+            var dir = Path.Combine(root, "res");
+            Directory.CreateDirectory(dir);
             foreach (var first in ils)
                 foreach (var second in ils)
                 {
                     if (first.Key.Equals(second.Key))
                         continue;
-                    var diffFile = Path.Combine("res", $"{first.Key}-{second.Key}.diff");
+                    var diffFile = Path.Combine(dir, $"{first.Key}-{second.Key}.diff");
                     var ins = 0;
                     var del = 0;
                     var chg = 0;
